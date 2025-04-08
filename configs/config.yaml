@@ -1,0 +1,12 @@
+# HTTP сервер
+port: "8080"
+host: "localhost"
+timeout: 5s
+idle_timeout: 60s
+
+# Настройки базы данных
+database_name: "pvz_service"
+database_host: "localhost"
+database_port: 5432
+database_user: "postgres"
+database_ssl_mode: "disable"
