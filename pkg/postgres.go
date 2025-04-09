@@ -30,13 +30,11 @@ func InitDBPool(ctx context.Context, cfg config.PGConfig) (*pgxpool.Pool, error)
 		return nil, fmt.Errorf("%w: %s", ErrConnectionFailed, err)
 	}
 
-	//log.Println("DB Connected")
-
 	return pool, nil
 }
 
 func pingDBPool(ctx context.Context, pool *pgxpool.Pool) error {
-	pingCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	pingCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	if err := pool.Ping(pingCtx); err != nil {

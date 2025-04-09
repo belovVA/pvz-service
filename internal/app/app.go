@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"pvz-service/internal/repository"
 	"syscall"
 	"time"
 
@@ -39,19 +40,19 @@ func NewApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("error loading jwt config: %w", err)
 	}
 
-	_, err = pkg.InitDBPool(ctx, pgCfg)
+	dbPool, err := pkg.InitDBPool(ctx, pgCfg)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing DB pool: %w", err)
 	}
 
-	// init repo
-	//repo := repository.NewRepository(DBPool)
+	//init repo
+	repo := repository.NewRepository(dbPool)
 
 	// init service
 	//service := service.NewService(repo, jwtSecret)
 
 	//init router
-	//r := handler.NewRouter(service_, logger_, jwtSecret)
+	//r := handler.NewRouter(service_, jwtSecret)
 	//return &App{
 	//	router: r,
 	//}

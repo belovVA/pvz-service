@@ -1,4 +1,4 @@
-package handler
+package dto
 
 type CreateUserRequest struct {
 	Email    string `json:"email" binding:"required"`
@@ -14,9 +14,4 @@ type CreateUserResponse struct {
 
 type CreateTestUserRequest struct {
 	Role string `json:"role" binding:"required"`
-}
-
-type LoginUserRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
 }
