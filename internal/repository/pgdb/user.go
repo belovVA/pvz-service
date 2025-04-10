@@ -4,11 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"pvz-service/internal/model"
 	"pvz-service/internal/repository/pgdb/converter"
 	modelRepo "pvz-service/internal/repository/pgdb/model"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -43,14 +44,14 @@ func (r *UserRepository) Create(ctx context.Context, user *model.User) (uuid.UUI
 	return id, nil
 }
 
-func (r *UserRepository) GetByEmailAndPass(ctx context.Context, email, password string) (*model.User, error) {
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	var user modelRepo.User
 	query := `
 		SELECT id, email, password, role
 		FROM users
-		WHERE email = $1 AND password = $2;
+		WHERE email = $1;
 	`
-	err := r.DB.QueryRow(ctx, query, email, password).Scan(&user.ID, &user.Email, &user.Password, &user.Role)
+	err := r.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %s", UserNotFound, email)
 	}

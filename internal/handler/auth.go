@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"pvz-service/internal/converter"
@@ -20,11 +21,16 @@ func NewAuthHandler(service AuthService) *AuthHandlers {
 }
 
 func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
-
 	var req dto.CreateUserRequest
-
+	log.Println(r.Body)
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body: "+err.Error(), http.StatusBadRequest)
+		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		return
+	}
+
+	v := getValidator(r)
+	if err := v.Struct(req); err != nil {
+		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
 		return
 	}
 
@@ -35,9 +41,11 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := converter.ToCreateUserResponseFromUser(user)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(resp)
+	//w.Header().Set("Content-Type", "application/json")
+	//w.WriteHeader(http.StatusCreated)
+	//_ = json.NewEncoder(w).Encode(resp)
+	pkg.SuccessJSON(w, resp, http.StatusCreated)
+
 }
 
 func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
@@ -46,35 +54,39 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		pkg.WriteError(w, "Invalid Request Body: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	v := getValidator(r)
+	if err := v.Struct(req); err != nil {
+		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		return
+	}
+
 	token, err := h.Service.Authenticate(r.Context(), *converter.ToUserFromLoginUserRequest(&req))
 	if err != nil {
 		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(token))
+	pkg.SuccessText(w, token, http.StatusOK)
 }
 
 func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	var req dto.TestUserRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body: "+err.Error(), http.StatusBadRequest)
+		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
+
+	v := getValidator(r)
+	if err := v.Struct(req); err != nil {
+		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		return
+	}
+
 	token, err := h.Service.DummyAuth(r.Context(), req.Role)
 	if err != nil {
 		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
 
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte(token))
-
+	pkg.SuccessText(w, token, http.StatusOK)
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"pvz-service/internal/model"
-	"pvz-service/pkg/hash_password"
+	"pvz-service/internal/service/pkg"
 )
 
 func (s *AuthService) Registration(ctx context.Context, user model.User) (*model.User, error) {
@@ -13,18 +13,21 @@ func (s *AuthService) Registration(ctx context.Context, user model.User) (*model
 		return nil, err
 	}
 
-	hashPass, err := hash_password.HashPassword(user.Password)
+	hashPass, err := pkg.HashPassword(user.Password)
 	if err != nil {
 		return nil, err
+	}
+
+	user.Password = hashPass
+
+	if _, err := s.userRepository.GetByEmail(ctx, user.Email); err == nil {
+		return nil, fmt.Errorf("user already exist")
 	}
 
 	userID, err := s.userRepository.Create(ctx, &user)
 	if err != nil {
 		return nil, err
 	}
-
-	user.ID = userID
-	user.Password = hashPass
 
 	return &model.User{
 		ID:       userID,

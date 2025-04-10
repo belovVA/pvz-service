@@ -9,7 +9,7 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, user *model.User) (uuid.UUID, error)
-	GetByEmailAndPass(ctx context.Context, email, password string) (*model.User, error)
+	GetByEmail(ctx context.Context, email string) (*model.User, error)
 }
 
 type AuthService struct {

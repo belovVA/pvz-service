@@ -5,21 +5,20 @@ import (
 	"fmt"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"pvz-service/internal/model"
-	"pvz-service/pkg/hash_password"
 	"pvz-service/pkg/jwtutils"
 )
 
 func (s *AuthService) Authenticate(ctx context.Context, user model.User) (string, error) {
 
-	hashPass, err := hash_password.HashPassword(user.Password)
+	current, err := s.userRepository.GetByEmail(ctx, user.Email)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("user not found")
 	}
 
-	current, err := s.userRepository.GetByEmailAndPass(ctx, user.Email, hashPass)
-	if err != nil {
-		return "", err
+	if err := bcrypt.CompareHashAndPassword([]byte(current.Password), []byte(user.Password)); err != nil {
+		return "", fmt.Errorf("invalid email or password")
 	}
 
 	token, err := s.generateJWT(current.ID.String(), current.Role)
@@ -85,5 +84,5 @@ func getTestUserByRole(role string) (*model.User, error) {
 		}, nil
 	}
 
-	return nil, err
+	return nil, fmt.Errorf("forbidden role")
 }
