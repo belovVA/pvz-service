@@ -1,0 +1,4 @@
+package: dto
+generate:
+  models: true
+output: internal/handler/dto/models.gen.go

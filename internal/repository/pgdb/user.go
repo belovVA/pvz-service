@@ -3,6 +3,7 @@ package pgdb
 import (
 	"context"
 	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"pvz-service/internal/model"
@@ -10,17 +11,17 @@ import (
 	modelRepo "pvz-service/internal/repository/pgdb/model"
 )
 
-type UserRepo struct {
+type UserRepository struct {
 	DB *pgxpool.Pool
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepo {
-	return &UserRepo{
+func NewUserRepository(db *pgxpool.Pool) *UserRepository {
+	return &UserRepository{
 		DB: db,
 	}
 }
 
-func (r *UserRepo) Create(ctx context.Context, user *model.User) (uuid.UUID, error) {
+func (r *UserRepository) Create(ctx context.Context, user *model.User) (uuid.UUID, error) {
 	var id uuid.UUID
 
 	query := `
@@ -37,7 +38,7 @@ func (r *UserRepo) Create(ctx context.Context, user *model.User) (uuid.UUID, err
 	return id, nil
 }
 
-func (r *UserRepo) Get(ctx context.Context, email, password string) (*model.User, error) {
+func (r *UserRepository) Get(ctx context.Context, email, password string) (*model.User, error) {
 	var user modelRepo.User
 	query := `
 		SELECT id, email, password, role

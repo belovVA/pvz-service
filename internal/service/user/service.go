@@ -1,15 +1,27 @@
 package user
 
-import "pvz-service/internal/repository"
+import (
+	"context"
 
-type userServ struct {
-	userRepository repository.UserRepository
+	"github.com/google/uuid"
+	"pvz-service/internal/model"
+)
+
+type UserRepository interface {
+	Create(ctx context.Context, user *model.User) (uuid.UUID, error)
+	Get(ctx context.Context, email, password string) (*model.User, error)
 }
 
-func NewUserservice(
-	userRepository repository.UserRepository,
-) *userServ {
-	return &userServ{
-		userRepository: userRepository,
+type UserService struct {
+	userRepository UserRepository
+	jwtSecret      string
+}
+
+func NewUserService(
+	repo UserRepository, jwt string,
+) *UserService {
+	return &UserService{
+		userRepository: repo,
+		jwtSecret:      jwt,
 	}
 }

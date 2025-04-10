@@ -8,11 +8,11 @@ import (
 )
 
 type pgConfig struct {
-	Name     string `yaml:"database_name" env:"DATABASE_NAME" env-required:"true"`
-	Host     string `yaml:"database_host" env:"DATABASE_HOST" env-required:"true"`
-	Port     string `yaml:"database_port" env:"DATABASE_PORT" env-required:"true"`
-	User     string `yaml:"database_user" env:"DATABASE_USER" env-required:"true"`
-	SSLMode  string `yaml:"database_ssl_mode" env:"DATABASE_SSL_MODE" env-required:"true"`
+	Name     string `yaml:"database_name" env-required:"true"`
+	Host     string `yaml:"database_host" env-required:"true"`
+	Port     string `yaml:"database_port" env-required:"true"`
+	User     string `yaml:"database_user" env-required:"true"`
+	SSLMode  string `yaml:"database_ssl_mode" env-required:"true"`
 	Password string `env:"DATABASE_PASSWORD" env-required:"true"`
 }
 
@@ -38,7 +38,7 @@ func PGConfigLoad() (*pgConfig, error) {
 
 func (cfg *pgConfig) GetDSN() string {
 	return fmt.Sprintf(
-		"host=%s user.go=%s password=%s dbname=%s port=%s sslmode=%s",
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		cfg.Host,
 		cfg.User,
 		cfg.Password,

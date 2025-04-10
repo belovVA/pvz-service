@@ -8,9 +8,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"pvz-service/internal/repository"
 	"syscall"
 	"time"
+
+	"pvz-service/internal/handler"
+	"pvz-service/internal/repository"
+	"pvz-service/internal/service"
 
 	"github.com/go-chi/chi/v5"
 	"pvz-service/internal/config"
@@ -30,12 +33,12 @@ func NewApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("error loading postgres config: %w", err)
 	}
 
-	_, err = config.HTTPConfigLoad()
+	htppCfg, err := config.HTTPConfigLoad()
 	if err != nil {
 		return nil, fmt.Errorf("error loading http config: %w", err)
 	}
 
-	_, err = config.JWTConfigLoad()
+	jwtCfg, err := config.JWTConfigLoad()
 	if err != nil {
 		return nil, fmt.Errorf("error loading jwt config: %w", err)
 	}
@@ -49,16 +52,14 @@ func NewApp(ctx context.Context) (*App, error) {
 	repo := repository.NewRepository(dbPool)
 
 	// init service
-	//service := service.NewService(repo, jwtSecret)
+	serv := service.NewService(repo, jwtCfg.Jwt)
 
 	//init router
-	//r := handler.NewRouter(service_, jwtSecret)
-	//return &App{
-	//	router: r,
-	//}
+	r := handler.NewRouter(serv, jwtCfg.Jwt)
 
 	return &App{
-			router: nil,
+			router:  r,
+			httpCfg: htppCfg,
 		},
 		nil
 }

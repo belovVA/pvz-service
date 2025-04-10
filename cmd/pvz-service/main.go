@@ -15,7 +15,7 @@ func main() {
 		slog.Error("failed to initialize app", "error", err)
 		panic(err)
 	}
-
+	slog.Info("starting server")
 	err = a.Run()
 	if err != nil {
 		slog.Error("failed to run app", "error", err)
