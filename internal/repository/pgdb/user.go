@@ -11,6 +11,11 @@ import (
 	modelRepo "pvz-service/internal/repository/pgdb/model"
 )
 
+const (
+	FailedCreateUser = "failed to Create User"
+	UserNotFound     = "user not found"
+)
+
 type UserRepository struct {
 	DB *pgxpool.Pool
 }
@@ -32,13 +37,13 @@ func (r *UserRepository) Create(ctx context.Context, user *model.User) (uuid.UUI
 	// QueryRow выполняет запрос и ожидает одну строку в результате.
 	err := r.DB.QueryRow(ctx, query, user.Email, user.Password, user.Role).Scan(&id)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("failed to Create User: %w", err)
+		return uuid.Nil, fmt.Errorf("%s: %s", FailedCreateUser, err.Error())
 	}
 
 	return id, nil
 }
 
-func (r *UserRepository) Get(ctx context.Context, email, password string) (*model.User, error) {
+func (r *UserRepository) GetByEmailAndPass(ctx context.Context, email, password string) (*model.User, error) {
 	var user modelRepo.User
 	query := `
 		SELECT id, email, password, role
@@ -47,7 +52,7 @@ func (r *UserRepository) Get(ctx context.Context, email, password string) (*mode
 	`
 	err := r.DB.QueryRow(ctx, query, email, password).Scan(&user.ID, &user.Email, &user.Password, &user.Role)
 	if err != nil {
-		return nil, fmt.Errorf("не найден пользователь с указанными данными: %w", err)
+		return nil, fmt.Errorf("%s: %s", UserNotFound, email)
 	}
 	return converter.ToUserFromUserRepo(&user), nil
 }

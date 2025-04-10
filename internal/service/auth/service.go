@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"context"
@@ -9,18 +9,18 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, user *model.User) (uuid.UUID, error)
-	Get(ctx context.Context, email, password string) (*model.User, error)
+	GetByEmailAndPass(ctx context.Context, email, password string) (*model.User, error)
 }
 
-type UserService struct {
+type AuthService struct {
 	userRepository UserRepository
 	jwtSecret      string
 }
 
-func NewUserService(
+func NewAuthService(
 	repo UserRepository, jwt string,
-) *UserService {
-	return &UserService{
+) *AuthService {
+	return &AuthService{
 		userRepository: repo,
 		jwtSecret:      jwt,
 	}

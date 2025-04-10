@@ -1,19 +1,19 @@
 package service
 
 import (
-	"pvz-service/internal/service/user"
+	"pvz-service/internal/service/auth"
 )
 
 type Repository interface {
-	user.UserRepository
+	auth.UserRepository
 }
 
 type Service struct {
-	*user.UserService
+	*auth.AuthService
 }
 
 func NewService(repo Repository, jwtSecret string) *Service {
 	return &Service{
-		UserService: user.NewUserService(repo, jwtSecret),
+		AuthService: auth.NewAuthService(repo, jwtSecret),
 	}
 }

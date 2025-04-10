@@ -38,7 +38,7 @@ func PGConfigLoad() (*pgConfig, error) {
 
 func (cfg *pgConfig) GetDSN() string {
 	return fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		"host=%s auth=%s password=%s dbname=%s port=%s sslmode=%s",
 		cfg.Host,
 		cfg.User,
 		cfg.Password,

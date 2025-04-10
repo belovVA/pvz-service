@@ -1,4 +1,4 @@
-package user
+package auth
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"pvz-service/pkg/hash_password"
 )
 
-func (s *UserService) CreateUser(ctx context.Context, user model.User) (*model.User, error) {
-	if err := ValidateRole(user.Role); err != nil {
+func (s *AuthService) Registration(ctx context.Context, user model.User) (*model.User, error) {
+	if err := s.validateRole(user.Role); err != nil {
 		return nil, err
 	}
 
@@ -34,7 +34,7 @@ func (s *UserService) CreateUser(ctx context.Context, user model.User) (*model.U
 	}, nil
 }
 
-func ValidateRole(role string) error {
+func (s *AuthService) validateRole(role string) error {
 	switch role {
 	case "employee":
 		return nil

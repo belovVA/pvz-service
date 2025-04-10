@@ -11,7 +11,3 @@ type CreateUserResponse struct {
 	Email string `json:"email"`
 	Role  string `json:"role"`
 }
-
-type CreateTestUserRequest struct {
-	Role string `json:"role" binding:"required"`
-}
