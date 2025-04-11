@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
@@ -15,6 +16,7 @@ import (
 
 type ProductService interface {
 	AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error)
+	DeleteProduct(ctx context.Context, pvzID uuid.UUID) error
 }
 
 type ProductHandlers struct {
@@ -56,4 +58,23 @@ func (h *ProductHandlers) CreateNewProduct(w http.ResponseWriter, r *http.Reques
 	resp := converter.ToProductResponseFromProduct(product)
 
 	pkg.SuccessJSON(w, resp, http.StatusCreated)
+}
+
+func (h *ProductHandlers) RemoveLastProduct(w http.ResponseWriter, r *http.Request) {
+	pvzIdStr := chi.URLParam(r, "pvzId")
+
+	pvzID, err := uuid.Parse(pvzIdStr)
+	if err != nil {
+		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		return
+	}
+
+	err = h.Service.DeleteProduct(r.Context(), pvzID)
+	if err != nil {
+		pkg.WriteError(w, fmt.Sprintf("failed to delete product:  %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	pkg.Success(w, http.StatusOK)
+
 }

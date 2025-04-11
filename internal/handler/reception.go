@@ -76,5 +76,5 @@ func (h *ReceptionHandlers) CloseLastReception(w http.ResponseWriter, r *http.Re
 
 	resp := converter.ToReceptionResponseFromReception(recep)
 
-	pkg.SuccessJSON(w, resp, http.StatusCreated)
+	pkg.SuccessJSON(w, resp, http.StatusOK)
 }

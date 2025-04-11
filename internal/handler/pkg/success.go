@@ -16,3 +16,7 @@ func SuccessText(w http.ResponseWriter, text string, statusCode int) {
 	w.WriteHeader(statusCode)
 	_, _ = w.Write([]byte(text))
 }
+
+func Success(w http.ResponseWriter, statusCode int) {
+	w.WriteHeader(statusCode)
+}

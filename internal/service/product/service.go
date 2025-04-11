@@ -10,6 +10,8 @@ import (
 type ProductRepository interface {
 	CreateProduct(ctx context.Context, typeProduct string, recepID uuid.UUID) (uuid.UUID, error)
 	GetProductByID(ctx context.Context, id uuid.UUID) (*model.Product, error)
+	GetLastProduct(ctx context.Context, receptionID uuid.UUID) (*model.Product, error)
+	DeleteProductByID(ctx context.Context, id uuid.UUID) error
 }
 
 type ReceptionRepository interface {

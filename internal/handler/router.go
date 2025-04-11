@@ -45,6 +45,7 @@ func NewRouter(service Service, jwtSecret string) *chi.Mux {
 			emp.Post("/receptions", http.HandlerFunc(router.newReception))
 			emp.Post("/products", http.HandlerFunc(router.newProduct))
 			emp.Post("/pvz/{pvzId}/close_last_reception", http.HandlerFunc(router.closeReception))
+			emp.Post("/pvz/{pvzId}/delete_last_product", http.HandlerFunc(router.deleteLastProduct))
 		})
 	})
 	r.Route("/auth", func(r chi.Router) {})
@@ -91,4 +92,9 @@ func (r *Router) newProduct(w http.ResponseWriter, req *http.Request) {
 func (r *Router) closeReception(w http.ResponseWriter, req *http.Request) {
 	h := NewReceptionHandler(r.service)
 	h.CloseLastReception(w, req)
+}
+
+func (r *Router) deleteLastProduct(w http.ResponseWriter, req *http.Request) {
+	h := NewProductHandler(r.service)
+	h.RemoveLastProduct(w, req)
 }

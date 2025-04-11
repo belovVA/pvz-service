@@ -12,11 +12,7 @@ func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID)
 	// Проверяем наличие последней приемки в данном ПВЗ и смотрим, был ли он закрыт
 	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
 
-	if err != nil {
-		return nil, fmt.Errorf("pvz doesnt exist")
-	}
-
-	if !reception.IsClosed {
+	if err == nil && !reception.IsClosed {
 		return nil, fmt.Errorf("in this PVZ, the reception  has not been closed yet.")
 	}
 
