@@ -12,12 +12,12 @@ func (s *PvzService) AddNewPvz(ctx context.Context, city string) (*model.Pvz, er
 		return nil, err
 	}
 
-	idPvz, err := s.repo.CreatePvz(ctx, city)
+	idPvz, err := s.pvzRepository.CreatePvz(ctx, city)
 	if err != nil {
 		return nil, err
 	}
 
-	pvz, err := s.repo.GetPvzByID(ctx, idPvz)
+	pvz, err := s.pvzRepository.GetPvzByID(ctx, idPvz)
 	if err != nil {
 		return nil, err
 	}

@@ -13,9 +13,9 @@ type PvzRepository interface {
 }
 
 type PvzService struct {
-	repo PvzRepository
+	pvzRepository PvzRepository
 }
 
 func NewPvzService(repo PvzRepository) *PvzService {
-	return &PvzService{repo: repo}
+	return &PvzService{pvzRepository: repo}
 }

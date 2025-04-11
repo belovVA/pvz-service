@@ -76,7 +76,7 @@ func (r *PVZRepository) GetPvzByID(ctx context.Context, id uuid.UUID) (*model.Pv
 		&pvz.City,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%s", PvzNotFound)
+		return nil, fmt.Errorf(PvzNotFound)
 	}
 
 	return converter.ToPvzFromPvzRepo(&pvz), nil

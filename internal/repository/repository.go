@@ -8,11 +8,13 @@ import (
 type Repository struct {
 	*pgdb.UserRepository
 	*pgdb.PVZRepository
+	*pgdb.ReceptionRepository
 }
 
 func NewRepository(db *pgxpool.Pool) *Repository {
 	return &Repository{
-		UserRepository: pgdb.NewUserRepository(db),
-		PVZRepository:  pgdb.NewPVZRepository(db),
+		UserRepository:      pgdb.NewUserRepository(db),
+		PVZRepository:       pgdb.NewPVZRepository(db),
+		ReceptionRepository: pgdb.NewReceptionRepository(db),
 	}
 }
