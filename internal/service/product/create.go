@@ -3,7 +3,6 @@ package product
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 	"pvz-service/internal/model"
@@ -16,7 +15,7 @@ func (s *ProductService) AddProduct(ctx context.Context, typeProduct string, pvz
 
 	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("pvz doesn't exists or it doesn't has any receptions")
 	}
 
 	if reception.IsClosed {
@@ -25,8 +24,6 @@ func (s *ProductService) AddProduct(ctx context.Context, typeProduct string, pvz
 
 	idProduct, err := s.productRepository.CreateProduct(ctx, typeProduct, reception.ID)
 	if err != nil {
-		log.Println("qwer")
-
 		return nil, err
 	}
 

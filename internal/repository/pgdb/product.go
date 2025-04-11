@@ -3,7 +3,6 @@ package pgdb
 import (
 	"context"
 	"fmt"
-	"log"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -50,7 +49,6 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, typeProduct strin
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("failed to build query: %w", err)
 	}
-	log.Println(id, recepID)
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
 	if err != nil {
