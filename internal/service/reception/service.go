@@ -11,6 +11,7 @@ type ReceptionRepository interface {
 	CreateReception(ctx context.Context, pvzID uuid.UUID) (uuid.UUID, error)
 	GetReceptionByID(ctx context.Context, id uuid.UUID) (*model.Reception, error)
 	GetLastReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
+	CloseReception(ctx context.Context, receptionID uuid.UUID) error
 }
 
 type ReceptionService struct {

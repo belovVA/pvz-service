@@ -110,3 +110,27 @@ func (r *ReceptionRepository) GetLastReception(ctx context.Context, pvzID uuid.U
 
 	return converter.ToReceptionFromReceptionRepo(&reception), nil
 }
+
+func (r *ReceptionRepository) CloseReception(ctx context.Context, receptionID uuid.UUID) error {
+	query, args, err := sq.
+		Update(receptionTable).
+		Set(isClosedStatus, true).
+		Where(sq.Eq{receptionIDColumn: receptionID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return fmt.Errorf("failed to build SQL query: %w", err)
+	}
+
+	// Выполняем запрос
+	cmdTag, err := r.DB.Exec(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to execute update: %w", err)
+	}
+
+	// Проверяем, что была затронута хотя бы одна строка
+	if cmdTag.RowsAffected() == 0 {
+		return fmt.Errorf("no rows affected, reception not found")
+	}
+	return nil
+}

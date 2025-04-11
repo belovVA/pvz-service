@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
@@ -15,6 +16,7 @@ import (
 
 type ReceptionService interface {
 	CreateReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
+	CloseReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
 }
 type ReceptionHandlers struct {
 	Service ReceptionService
@@ -48,7 +50,27 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 
 	recep, err := h.Service.CreateReception(r.Context(), id)
 	if err != nil {
-		pkg.WriteError(w, fmt.Sprintf("Failed to create Reception: %s", err.Error()), http.StatusBadRequest)
+		pkg.WriteError(w, fmt.Sprintf("failed to create Reception: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	resp := converter.ToReceptionResponseFromReception(recep)
+
+	pkg.SuccessJSON(w, resp, http.StatusCreated)
+}
+
+func (h *ReceptionHandlers) CloseLastReception(w http.ResponseWriter, r *http.Request) {
+	pvzIdStr := chi.URLParam(r, "pvzId")
+
+	pvzID, err := uuid.Parse(pvzIdStr)
+	if err != nil {
+		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		return
+	}
+
+	recep, err := h.Service.CloseReception(r.Context(), pvzID)
+	if err != nil {
+		pkg.WriteError(w, fmt.Sprintf("failed to close reception:  %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 

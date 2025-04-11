@@ -44,10 +44,18 @@ func NewRouter(service Service, jwtSecret string) *chi.Mux {
 			emp.Use(middleware.RequireRoles(employeeRole))
 			emp.Post("/receptions", http.HandlerFunc(router.newReception))
 			emp.Post("/products", http.HandlerFunc(router.newProduct))
+			emp.Post("/pvz/{pvzId}/close_last_reception", http.HandlerFunc(router.closeReception))
 		})
 	})
 	r.Route("/auth", func(r chi.Router) {})
 	return r
+}
+
+func getValidator(r *http.Request) *validator.Validate {
+	if v, ok := r.Context().Value("validator").(*validator.Validate); ok {
+		return v
+	}
+	return validator.New()
 }
 
 func (r *Router) registerHandler(w http.ResponseWriter, req *http.Request) {
@@ -80,9 +88,7 @@ func (r *Router) newProduct(w http.ResponseWriter, req *http.Request) {
 	h.CreateNewProduct(w, req)
 }
 
-func getValidator(r *http.Request) *validator.Validate {
-	if v, ok := r.Context().Value("validator").(*validator.Validate); ok {
-		return v
-	}
-	return validator.New()
+func (r *Router) closeReception(w http.ResponseWriter, req *http.Request) {
+	h := NewReceptionHandler(r.service)
+	h.CloseLastReception(w, req)
 }
