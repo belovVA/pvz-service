@@ -13,21 +13,22 @@ import (
 	"pvz-service/internal/model"
 )
 
-type ReceptionService interface {
-	CreateReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
-}
-type ReceptionHandlers struct {
-	Service ReceptionService
+type ProductService interface {
+	AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error)
 }
 
-func NewReceptionHandler(service ReceptionService) *ReceptionHandlers {
-	return &ReceptionHandlers{
+type ProductHandlers struct {
+	Service ProductService
+}
+
+func NewProductHandler(service ProductService) *ProductHandlers {
+	return &ProductHandlers{
 		Service: service,
 	}
 }
 
-func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Request) {
-	var req dto.CreateReceptionRequest
+func (h *ProductHandlers) CreateNewProduct(w http.ResponseWriter, r *http.Request) {
+	var req dto.CreateProductRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
@@ -40,19 +41,19 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	id, err := uuid.Parse(req.PvzID)
+	pvzID, err := uuid.Parse(req.PvzID)
 	if err != nil {
 		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
 		return
 	}
 
-	recep, err := h.Service.CreateReception(r.Context(), id)
+	product, err := h.Service.AddProduct(r.Context(), req.TypeProduct, pvzID)
 	if err != nil {
-		pkg.WriteError(w, fmt.Sprintf("Failed to create Reception: %s", err.Error()), http.StatusBadRequest)
+		pkg.WriteError(w, fmt.Sprintf("Failed to create Product: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
-	resp := converter.ToReceptionResponseFromReception(recep)
+	resp := converter.ToProductResponseFromProduct(product)
 
 	pkg.SuccessJSON(w, resp, http.StatusCreated)
 }

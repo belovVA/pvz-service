@@ -8,16 +8,16 @@ import (
 	"pvz-service/internal/model"
 )
 
-func (s *ReceptionService) CreateReception(ctx context.Context, pvzId uuid.UUID) (*model.Reception, error) {
+func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error) {
 	// Проверяем наличие последней приемки в данном ПВЗ и смотрим, был ли он закрыт
-	reception, err := s.receptionRepository.GetLastReception(ctx, pvzId)
+	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
 	if err == nil {
 		if !reception.IsClosed {
 			return nil, fmt.Errorf("in this PVZ, the reception  has not been closed yet.")
 		}
 	}
 
-	id, err := s.receptionRepository.CreateReception(ctx, pvzId)
+	id, err := s.receptionRepository.CreateReception(ctx, pvzID)
 	if err != nil {
 		return nil, err
 	}

@@ -17,6 +17,7 @@ type Service interface {
 	AuthService
 	PvzService
 	ReceptionService
+	ProductService
 }
 
 type Router struct {
@@ -42,6 +43,7 @@ func NewRouter(service Service, jwtSecret string) *chi.Mux {
 		protected.Group(func(emp chi.Router) {
 			emp.Use(middleware.RequireRoles(employeeRole))
 			emp.Post("/receptions", http.HandlerFunc(router.newReception))
+			emp.Post("/products", http.HandlerFunc(router.newProduct))
 		})
 	})
 	r.Route("/auth", func(r chi.Router) {})
@@ -67,10 +69,17 @@ func (r *Router) newPvz(w http.ResponseWriter, req *http.Request) {
 	h := NewPvzHandler(r.service)
 	h.CreateNewPvz(w, req)
 }
+
 func (r *Router) newReception(w http.ResponseWriter, req *http.Request) {
 	h := NewReceptionHandler(r.service)
 	h.OpenNewReception(w, req)
 }
+
+func (r *Router) newProduct(w http.ResponseWriter, req *http.Request) {
+	h := NewProductHandler(r.service)
+	h.CreateNewProduct(w, req)
+}
+
 func getValidator(r *http.Request) *validator.Validate {
 	if v, ok := r.Context().Value("validator").(*validator.Validate); ok {
 		return v
