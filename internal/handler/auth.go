@@ -1,14 +1,21 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
 	"pvz-service/internal/handler/pkg"
+	"pvz-service/internal/model"
 )
+
+type AuthService interface {
+	Registration(ctx context.Context, user model.User) (*model.User, error)
+	Authenticate(ctx context.Context, user model.User) (string, error)
+	DummyAuth(ctx context.Context, role string) (string, error)
+}
 
 type AuthHandlers struct {
 	Service AuthService
@@ -22,7 +29,7 @@ func NewAuthHandler(service AuthService) *AuthHandlers {
 
 func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateUserRequest
-	log.Println(r.Body)
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
 		return
@@ -41,15 +48,13 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := converter.ToCreateUserResponseFromUser(user)
-	//w.Header().Set("Content-Type", "application/json")
-	//w.WriteHeader(http.StatusCreated)
-	//_ = json.NewEncoder(w).Encode(resp)
-	pkg.SuccessJSON(w, resp, http.StatusCreated)
 
+	pkg.SuccessJSON(w, resp, http.StatusCreated)
 }
 
 func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pkg.WriteError(w, "Invalid Request Body: "+err.Error(), http.StatusBadRequest)
 		return
@@ -66,11 +71,13 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	pkg.SuccessText(w, token, http.StatusOK)
 }
 
 func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	var req dto.TestUserRequest
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
 		return

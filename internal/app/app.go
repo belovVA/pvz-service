@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"pvz-service/internal/handler"
-	"pvz-service/internal/middleware"
 	"pvz-service/internal/repository"
 	"pvz-service/internal/service"
 
@@ -56,8 +55,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	serv := service.NewService(repo, jwtCfg.Jwt)
 
 	//init router
-	v := middleware.NewValidator()
-	r := handler.NewRouter(serv, jwtCfg.Jwt, v)
+	r := handler.NewRouter(serv, jwtCfg.Jwt)
 
 	return &App{
 			router:  r,

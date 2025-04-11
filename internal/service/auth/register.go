@@ -20,11 +20,11 @@ func (s *AuthService) Registration(ctx context.Context, user model.User) (*model
 
 	user.Password = hashPass
 
-	if _, err := s.userRepository.GetByEmail(ctx, user.Email); err == nil {
+	if _, err := s.userRepository.GetUserByEmail(ctx, user.Email); err == nil {
 		return nil, fmt.Errorf("user already exist")
 	}
 
-	userID, err := s.userRepository.Create(ctx, &user)
+	userID, err := s.userRepository.CreateUser(ctx, &user)
 	if err != nil {
 		return nil, err
 	}
@@ -44,5 +44,5 @@ func (s *AuthService) validateRole(role string) error {
 	case "moderator":
 		return nil
 	}
-	return fmt.Errorf("invalid role")
+	return fmt.Errorf("invalid role: %s", role)
 }
