@@ -18,6 +18,12 @@ type AuthService interface {
 	DummyAuth(ctx context.Context, role string) (string, error)
 }
 
+const (
+	ErrBodyRequest   = "Invalid Request Body"
+	ErrRequestFields = "Invalid Request Fields"
+	ErrInvalidRole   = "invalid role in Request"
+)
+
 type AuthHandlers struct {
 	Service AuthService
 }
@@ -32,13 +38,13 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
 		return
 	}
 
@@ -62,19 +68,19 @@ func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body: "+err.Error(), http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusUnauthorized)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusUnauthorized)
 		return
 	}
 
 	token, err := h.Service.Authenticate(r.Context(), *converter.ToUserFromLoginUserRequest(&req))
 	if err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		pkg.WriteError(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 
@@ -85,13 +91,13 @@ func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	var req dto.TestUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
 		return
 	}
 
@@ -115,5 +121,5 @@ func validateRole(role string) error {
 		return nil
 	}
 
-	return fmt.Errorf("invalid role: %s", role)
+	return fmt.Errorf(ErrInvalidRole)
 }
