@@ -12,6 +12,12 @@ import (
 	"pvz-service/internal/model"
 )
 
+const (
+	MoscowRU = "Москва"
+	SpbRU    = "Санкт-Петербург"
+	KazanRU  = "Казань"
+)
+
 type PvzService interface {
 	AddNewPvz(ctx context.Context, city string) (*model.Pvz, error)
 }
@@ -40,6 +46,11 @@ func (h *PVZHandlers) CreateNewPvz(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateCity(req.City); err != nil {
+		pkg.WriteError(w, "Invalid City", http.StatusBadRequest)
+		return
+	}
+
 	pvz, err := h.Service.AddNewPvz(r.Context(), req.City)
 	if err != nil {
 		pkg.WriteError(w, fmt.Sprintf("Failed to create PVZ: %s", err.Error()), http.StatusBadRequest)
@@ -49,4 +60,13 @@ func (h *PVZHandlers) CreateNewPvz(w http.ResponseWriter, r *http.Request) {
 	resp := converter.ToCreatePvzResponseFromPvz(pvz)
 
 	pkg.SuccessJSON(w, resp, http.StatusCreated)
+}
+
+func validateCity(city string) error {
+	switch city {
+	case MoscowRU, SpbRU, KazanRU:
+		return nil
+	}
+
+	return fmt.Errorf("invalid city: %s", city)
 }

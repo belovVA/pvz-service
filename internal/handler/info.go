@@ -51,5 +51,6 @@ func (h *InfoHandlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := converter.ToPvzInfoResponseList(pvzList)
+
 	pkg.SuccessJSON(w, resp, http.StatusOK)
 }

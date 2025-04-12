@@ -14,6 +14,12 @@ import (
 	"pvz-service/internal/model"
 )
 
+const (
+	ElectrType  = "электроника"
+	ClothesType = "одежда"
+	ShoesType   = "обувь"
+)
+
 type ProductService interface {
 	AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error)
 	DeleteProduct(ctx context.Context, pvzID uuid.UUID) error
@@ -43,9 +49,14 @@ func (h *ProductHandlers) CreateNewProduct(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	pvzID, err := uuid.Parse(req.PvzID)
+	pvzID, err := converter.ParseUuid(req.PvzID)
 	if err != nil {
 		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		return
+	}
+
+	if err = validateType(req.TypeProduct); err != nil {
+		pkg.WriteError(w, "Invalid Type Product", http.StatusBadRequest)
 		return
 	}
 
@@ -76,5 +87,13 @@ func (h *ProductHandlers) RemoveLastProduct(w http.ResponseWriter, r *http.Reque
 	}
 
 	pkg.Success(w, http.StatusOK)
+}
 
+func validateType(typeProduct string) error {
+	switch typeProduct {
+	case ElectrType, ClothesType, ShoesType:
+		return nil
+	}
+
+	return fmt.Errorf("invalid product type: %s", typeProduct)
 }

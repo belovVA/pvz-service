@@ -8,12 +8,3 @@ type PvzInfoQuery struct {
 	Page      int
 	Limit     int
 }
-
-func (q *PvzInfoQuery) SetDefaults() {
-	if q.Page < 1 {
-		q.Page = 1
-	}
-	if q.Limit < 1 || q.Limit > 30 {
-		q.Limit = 10
-	}
-}

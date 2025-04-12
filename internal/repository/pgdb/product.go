@@ -15,7 +15,7 @@ import (
 const (
 	FailedCreateProduct = "failed to Create Product"
 	productNotFound     = "product not found"
-	BuildingQueryFailed = "failed to build query"
+	FailedBuildQuery    = "failed to build query"
 )
 
 const (
@@ -48,7 +48,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, typeProduct strin
 		ToSql()
 
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return uuid.Nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
@@ -68,7 +68,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -96,7 +96,7 @@ func (r *ProductRepository) GetLastProduct(ctx context.Context, receptionID uuid
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -119,18 +119,18 @@ func (r *ProductRepository) DeleteProductByID(ctx context.Context, id uuid.UUID)
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	// Выполняем запрос
 	cmdTag, err := r.DB.Exec(ctx, query, args...)
 	if err != nil {
-		return fmt.Errorf("failed to execute delete: %w", err)
+		return fmt.Errorf("%s: %w", FailedExecuteQuery, err)
 	}
 
 	// Проверяем, что была затронута хотя бы одна строка
 	if cmdTag.RowsAffected() == 0 {
-		return fmt.Errorf("no rows affected, product not found")
+		return fmt.Errorf(NoRowsAffected)
 	}
 
 	return nil
@@ -145,11 +145,11 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 	rows, err := r.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute query: %w", err)
+		return nil, fmt.Errorf("%s: %w", FailedExecuteQuery, err)
 	}
 
 	defer rows.Close()
@@ -162,7 +162,7 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 			&productRepo.TypeProduct,
 			&productRepo.ReceptionID,
 		); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, fmt.Errorf("%s: %w", FailedScanRow, err)
 		}
 
 		product := converter.ToProductFromProductRepo(&productRepo)
@@ -170,7 +170,7 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 	}
 
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("rows error: %w", rows.Err())
+		return nil, fmt.Errorf("%w", rows.Err())
 	}
 
 	return result, nil

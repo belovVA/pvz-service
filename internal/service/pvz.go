@@ -1,4 +1,4 @@
-package pvz
+package service
 
 import (
 	"context"
@@ -19,4 +19,18 @@ type PvzService struct {
 
 func NewPvzService(repo PvzRepository) *PvzService {
 	return &PvzService{pvzRepository: repo}
+}
+
+func (s *PvzService) AddNewPvz(ctx context.Context, city string) (*model.Pvz, error) {
+	idPvz, err := s.pvzRepository.CreatePvz(ctx, city)
+	if err != nil {
+		return nil, err
+	}
+
+	pvz, err := s.pvzRepository.GetPvzByID(ctx, idPvz)
+	if err != nil {
+		return nil, err
+	}
+
+	return pvz, nil
 }

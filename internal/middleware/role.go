@@ -23,7 +23,6 @@ func RequireRoles(allowedRoles ...string) func(http.Handler) http.Handler {
 			}
 
 			pkg.WriteError(w, "forbidden", http.StatusForbidden)
-
 		})
 	}
 }

@@ -43,7 +43,6 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 
 		userID, ok := claims["user_id"].(string)
 		if !ok {
-			//j.logger.Error("invalid token payload: missing user_id")
 			pkg.WriteError(w, "Invalid token", http.StatusForbidden)
 			return
 		}
@@ -54,10 +53,8 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		//j.logger.Info("authentication successful for user: " + userID)
 		ctx := context.WithValue(r.Context(), "user_id", userID)
 		ctx = context.WithValue(ctx, "role", role)
 		next.ServeHTTP(w, r.WithContext(ctx))
-
 	})
 }

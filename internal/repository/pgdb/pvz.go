@@ -46,7 +46,7 @@ func (r *PVZRepository) CreatePvz(ctx context.Context, city string) (uuid.UUID, 
 		ToSql()
 
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return uuid.Nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
@@ -67,7 +67,7 @@ func (r *PVZRepository) GetPvzByID(ctx context.Context, id uuid.UUID) (*model.Pv
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -89,11 +89,11 @@ func (r *PVZRepository) GetIDListPvz(ctx context.Context) ([]uuid.UUID, error) {
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
 	}
 	rows, err := r.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute query: %w", err)
+		return nil, fmt.Errorf("%s: %w", FailedExecuteQuery, err)
 	}
 
 	defer rows.Close()
@@ -101,14 +101,14 @@ func (r *PVZRepository) GetIDListPvz(ctx context.Context) ([]uuid.UUID, error) {
 	for rows.Next() {
 		var id uuid.UUID
 		if err = rows.Scan(&id); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+			return nil, fmt.Errorf("%s: %w", FailedScanRow, err)
 		}
 
 		result = append(result, id)
 	}
 
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("rows error: %w", rows.Err())
+		return nil, fmt.Errorf("%w", rows.Err())
 	}
 
 	return result, nil

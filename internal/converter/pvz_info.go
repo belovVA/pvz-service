@@ -25,11 +25,20 @@ func ToPvzInfoQueryFromPvzInfoResponse(req *dto.PvzInfoRequest) (*model.PvzInfoQ
 		Page:      req.Page,
 		Limit:     req.Limit,
 	}
-	ans.SetDefaults()
-	//log.Println(ans, ans.StartDate.IsZero())
+
+	setDefaultsPagination(ans)
 
 	return ans, nil
 
+}
+
+func setDefaultsPagination(q *model.PvzInfoQuery) {
+	if q.Page < 1 {
+		q.Page = 1
+	}
+	if q.Limit < 1 || q.Limit > 30 {
+		q.Limit = 10
+	}
 }
 
 func ToPvzInfoResponseList(pvzList []*model.Pvz) []dto.SinglePvzInfoResponse {

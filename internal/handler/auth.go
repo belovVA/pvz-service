@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"pvz-service/internal/converter"
@@ -38,6 +39,11 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
 		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		return
+	}
+
+	if err := validateRole(req.Role); err != nil {
+		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -89,6 +95,11 @@ func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := validateRole(req.Role); err != nil {
+		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	token, err := h.Service.DummyAuth(r.Context(), req.Role)
 	if err != nil {
 		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
@@ -96,4 +107,13 @@ func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pkg.SuccessText(w, token, http.StatusOK)
+}
+
+func validateRole(role string) error {
+	switch role {
+	case employeeRole, moderatorRole:
+		return nil
+	}
+
+	return fmt.Errorf("invalid role: %s", role)
 }
