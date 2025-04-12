@@ -5,8 +5,8 @@ import (
 	"pvz-service/internal/model"
 )
 
-func ToProductResponseFromProduct(product *model.Product) *dto.CreateProductResponse {
-	return &dto.CreateProductResponse{
+func ToProductResponseFromProduct(product *model.Product) *dto.ProductResponse {
+	return &dto.ProductResponse{
 		ID:          product.ID.String(),
 		DateTime:    product.DateTime,
 		TypeProduct: product.TypeProduct,

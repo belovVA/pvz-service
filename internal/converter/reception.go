@@ -5,8 +5,8 @@ import (
 	"pvz-service/internal/model"
 )
 
-func ToReceptionResponseFromReception(r *model.Reception) *dto.CreateReceptionResponse {
-	return &dto.CreateReceptionResponse{
+func ToReceptionResponseFromReception(r *model.Reception) *dto.ReceptionResponse {
+	return &dto.ReceptionResponse{
 		ID:       r.ID.String(),
 		DateTime: r.DateTime,
 		PvzID:    r.PvzID.String(),

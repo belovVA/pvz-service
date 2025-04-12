@@ -42,7 +42,7 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	id, err := uuid.Parse(req.PvzID)
+	id, err := converter.ParseUuid(req.PvzID)
 	if err != nil {
 		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
 		return
@@ -62,7 +62,7 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 func (h *ReceptionHandlers) CloseLastReception(w http.ResponseWriter, r *http.Request) {
 	pvzIdStr := chi.URLParam(r, "pvzId")
 
-	pvzID, err := uuid.Parse(pvzIdStr)
+	pvzID, err := converter.ParseUuid(pvzIdStr)
 	if err != nil {
 		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
 		return

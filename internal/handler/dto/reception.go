@@ -6,7 +6,7 @@ type CreateReceptionRequest struct {
 	PvzID string `json:"pvzId" validate:"required"`
 }
 
-type CreateReceptionResponse struct {
+type ReceptionResponse struct {
 	ID       string    `json:"id"`
 	DateTime time.Time `json:"dateTime"`
 	PvzID    string    `json:"pvzId"`

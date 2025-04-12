@@ -5,8 +5,8 @@ import (
 	"pvz-service/internal/model"
 )
 
-func ToCreatePvzResponseFromPvz(pvz *model.Pvz) *dto.CreatePvzResponse {
-	return &dto.CreatePvzResponse{
+func ToCreatePvzResponseFromPvz(pvz *model.Pvz) *dto.PvzResponse {
+	return &dto.PvzResponse{
 		ID:               pvz.ID.String(),
 		RegistrationDate: pvz.RegistrationDate,
 		City:             pvz.City,

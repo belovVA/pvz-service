@@ -7,7 +7,7 @@ type CreateProductRequest struct {
 	PvzID       string `json:"pvzId" validate:"required"`
 }
 
-type CreateProductResponse struct {
+type ProductResponse struct {
 	ID          string    `json:"id"`
 	DateTime    time.Time `json:"dateTime"`
 	TypeProduct string    `json:"type"`
