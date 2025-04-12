@@ -47,7 +47,7 @@ func (r *UserRepository) CreateUser(ctx context.Context, user *model.User) (uuid
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("failed to build query: %w", err)
+		return uuid.Nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
@@ -68,7 +68,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
+		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(

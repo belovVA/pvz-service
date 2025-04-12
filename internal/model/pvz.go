@@ -10,5 +10,5 @@ type Pvz struct {
 	ID               uuid.UUID
 	RegistrationDate time.Time
 	City             string
-	Reception        []Product
+	Receptions       []Reception
 }

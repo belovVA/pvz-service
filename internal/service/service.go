@@ -2,6 +2,7 @@ package service
 
 import (
 	"pvz-service/internal/service/auth"
+	"pvz-service/internal/service/info"
 	"pvz-service/internal/service/product"
 	"pvz-service/internal/service/pvz"
 	"pvz-service/internal/service/reception"
@@ -19,6 +20,7 @@ type Service struct {
 	*pvz.PvzService
 	*reception.ReceptionService
 	*product.ProductService
+	*info.InfoService
 }
 
 func NewService(repo Repository, jwtSecret string) *Service {
@@ -27,5 +29,6 @@ func NewService(repo Repository, jwtSecret string) *Service {
 		PvzService:       pvz.NewPvzService(repo),
 		ReceptionService: reception.NewReceptionService(repo),
 		ProductService:   product.NewProductService(repo, repo),
+		InfoService:      info.NewInfoService(repo, repo, repo),
 	}
 }

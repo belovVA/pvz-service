@@ -1,31 +1,21 @@
 package info
 
 import (
-	"github.com/google/uuid"
-	"pvz-service/internal/model"
+	"pvz-service/internal/service/product"
+	"pvz-service/internal/service/pvz"
+	"pvz-service/internal/service/reception"
 )
 
-type ProductRepository interface {
-	CreateProduct(ctx context.Context, typeProduct string, recepID uuid.UUID) (uuid.UUID, error)
-	GetProductByID(ctx context.Context, id uuid.UUID) (*model.Product, error)
-	GetLastProduct(ctx context.Context, receptionID uuid.UUID) (*model.Product, error)
-	DeleteProductByID(ctx context.Context, id uuid.UUID) error
+type InfoService struct {
+	productRepository   product.ProductRepository
+	receptionRepository reception.ReceptionRepository
+	pvzRepository       pvz.PvzRepository
 }
 
-type ReceptionRepository interface {
-	CreateReception(ctx context.Context, pvzID uuid.UUID) (uuid.UUID, error)
-	GetReceptionByID(ctx context.Context, id uuid.UUID) (*model.Reception, error)
-	GetLastReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
-}
-
-type ProductService struct {
-	productRepository   ProductRepository
-	receptionRepository ReceptionRepository
-}
-
-func NewProductService(repoProduct ProductRepository, repoRepository ReceptionRepository) *ProductService {
-	return &ProductService{
+func NewInfoService(repoProduct product.ProductRepository, repoRepository reception.ReceptionRepository, repoPvz pvz.PvzRepository) *InfoService {
+	return &InfoService{
 		productRepository:   repoProduct,
 		receptionRepository: repoRepository,
+		pvzRepository:       repoPvz,
 	}
 }

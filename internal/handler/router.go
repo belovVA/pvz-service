@@ -18,6 +18,7 @@ type Service interface {
 	PvzService
 	ReceptionService
 	ProductService
+	InfoService
 }
 
 type Router struct {
@@ -38,6 +39,8 @@ func NewRouter(service Service, jwtSecret string) *chi.Mux {
 		protected.Use(middleware.NewJWT(jwtSecret).Authenticate)
 
 		protected.With(middleware.RequireRoles(moderatorRole)).Post("/pvz", http.HandlerFunc(router.newPvz))
+
+		protected.With(middleware.RequireRoles(moderatorRole, employeeRole)).Get("/pvz", http.HandlerFunc(router.getInfoPvzByParameters))
 
 		// Cоздаём вложенную группу для ручек, требующих роль employee
 		protected.Group(func(emp chi.Router) {
@@ -97,4 +100,9 @@ func (r *Router) closeReception(w http.ResponseWriter, req *http.Request) {
 func (r *Router) deleteLastProduct(w http.ResponseWriter, req *http.Request) {
 	h := NewProductHandler(r.service)
 	h.RemoveLastProduct(w, req)
+}
+
+func (r *Router) getInfoPvzByParameters(w http.ResponseWriter, req *http.Request) {
+	h := NewInfoHandler(r.service)
+	h.GetInfo(w, req)
 }

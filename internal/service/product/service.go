@@ -12,6 +12,7 @@ type ProductRepository interface {
 	GetProductByID(ctx context.Context, id uuid.UUID) (*model.Product, error)
 	GetLastProduct(ctx context.Context, receptionID uuid.UUID) (*model.Product, error)
 	DeleteProductByID(ctx context.Context, id uuid.UUID) error
+	GetProductSliceByReceptionID(ctx context.Context, receptionID uuid.UUID) ([]model.Product, error)
 }
 
 type ReceptionRepository interface {

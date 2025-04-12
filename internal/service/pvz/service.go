@@ -10,6 +10,7 @@ import (
 type PvzRepository interface {
 	CreatePvz(ctx context.Context, city string) (uuid.UUID, error)
 	GetPvzByID(ctx context.Context, id uuid.UUID) (*model.Pvz, error)
+	GetIDListPvz(ctx context.Context) ([]uuid.UUID, error)
 }
 
 type PvzService struct {

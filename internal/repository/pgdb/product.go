@@ -15,6 +15,7 @@ import (
 const (
 	FailedCreateProduct = "failed to Create Product"
 	productNotFound     = "product not found"
+	BuildingQueryFailed = "failed to build query"
 )
 
 const (
@@ -47,7 +48,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, typeProduct strin
 		ToSql()
 
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("failed to build query: %w", err)
+		return uuid.Nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
@@ -67,7 +68,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
+		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -95,7 +96,7 @@ func (r *ProductRepository) GetLastProduct(ctx context.Context, receptionID uuid
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("failed to build query: %w", err)
+		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -118,7 +119,7 @@ func (r *ProductRepository) DeleteProductByID(ctx context.Context, id uuid.UUID)
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("failed to build query: %w", err)
+		return fmt.Errorf("%s: %w", BuildingQueryFailed, err)
 	}
 
 	// Выполняем запрос
@@ -133,4 +134,44 @@ func (r *ProductRepository) DeleteProductByID(ctx context.Context, id uuid.UUID)
 	}
 
 	return nil
+}
+
+func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, receptionID uuid.UUID) ([]model.Product, error) {
+	var result []model.Product
+	query, args, err := sq.
+		Select(productIDColumn, dateTimeProductColumn, typeProductColumn, receptionIDFKColumn).
+		From(productTable).
+		Where(sq.Eq{receptionIDFKColumn: receptionID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", BuildingQueryFailed, err)
+	}
+	rows, err := r.DB.Query(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var productRepo modelRepo.Product
+		if err = rows.Scan(
+			&productRepo.ID,
+			&productRepo.DateTime,
+			&productRepo.TypeProduct,
+			&productRepo.ReceptionID,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		product := converter.ToProductFromProductRepo(&productRepo)
+		result = append(result, *product)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("rows error: %w", rows.Err())
+	}
+
+	return result, nil
 }
