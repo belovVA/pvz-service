@@ -9,8 +9,21 @@ import (
 )
 
 const (
-	moderatorRole = "moderator"
-	employeeRole  = "employee"
+	ErrBodyRequest   = "Invalid Request Body"
+	ErrRequestFields = "Invalid Request Fields"
+	ErrInvalidRole   = "invalid role in Request"
+	ErrUUIDParsing   = "invalid ID format"
+)
+
+const (
+	ModeratorRole = "moderator"
+	EmployeeRole  = "employee"
+)
+
+const (
+	ElectrType  = "электроника"
+	ClothesType = "одежда"
+	ShoesType   = "обувь"
 )
 
 type Service interface {
@@ -38,13 +51,13 @@ func NewRouter(service Service, jwtSecret string) *chi.Mux {
 	r.Group(func(protected chi.Router) {
 		protected.Use(middleware.NewJWT(jwtSecret).Authenticate)
 
-		protected.With(middleware.RequireRoles(moderatorRole)).Post("/pvz", http.HandlerFunc(router.newPvz))
+		protected.With(middleware.RequireRoles(ModeratorRole)).Post("/pvz", http.HandlerFunc(router.newPvz))
 
-		protected.With(middleware.RequireRoles(moderatorRole, employeeRole)).Get("/pvz", http.HandlerFunc(router.getInfoPvzByParameters))
+		protected.With(middleware.RequireRoles(ModeratorRole, EmployeeRole)).Get("/pvz", http.HandlerFunc(router.getInfoPvzByParameters))
 
 		// Cоздаём вложенную группу для ручек, требующих роль employee
 		protected.Group(func(emp chi.Router) {
-			emp.Use(middleware.RequireRoles(employeeRole))
+			emp.Use(middleware.RequireRoles(EmployeeRole))
 			emp.Post("/receptions", http.HandlerFunc(router.newReception))
 			emp.Post("/products", http.HandlerFunc(router.newProduct))
 			emp.Post("/pvz/{pvzId}/close_last_reception", http.HandlerFunc(router.closeReception))

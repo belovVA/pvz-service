@@ -10,6 +10,9 @@ build:
 build-up:
 	docker compose up -d
 
+test:
+	go test ./...
+
 generate_repo_mocks:
 	$(MOCKERY) --name=UserRepository --dir=internal/service --output=internal/service/mocks
 	$(MOCKERY) --name=PvzRepository --dir=internal/service --output=internal/service/mocks

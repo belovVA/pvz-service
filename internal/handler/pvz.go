@@ -18,6 +18,10 @@ const (
 	KazanRU  = "Казань"
 )
 
+const (
+	ErrInvalidCity = "invalid city"
+)
+
 type PvzService interface {
 	AddNewPvz(ctx context.Context, city string) (*model.Pvz, error)
 }
@@ -36,18 +40,18 @@ func (h *PVZHandlers) CreateNewPvz(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreatePvzRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
 		return
 	}
 
 	if err := validateCity(req.City); err != nil {
-		pkg.WriteError(w, "Invalid City", http.StatusBadRequest)
+		pkg.WriteError(w, ErrInvalidCity, http.StatusBadRequest)
 		return
 	}
 

@@ -16,7 +16,7 @@ type Reception struct {
 
 func (r *Reception) Status() string {
 	if r.IsClosed {
-		return "closed"
+		return "close"
 	}
 	return "in_progress"
 }

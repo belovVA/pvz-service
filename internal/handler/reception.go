@@ -32,19 +32,19 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 	var req dto.CreateReceptionRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
 		return
 	}
 
 	id, err := converter.ParseUuid(req.PvzID)
 	if err != nil {
-		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		pkg.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		return
 	}
 
@@ -64,13 +64,13 @@ func (h *ReceptionHandlers) CloseLastReception(w http.ResponseWriter, r *http.Re
 
 	pvzID, err := converter.ParseUuid(pvzIdStr)
 	if err != nil {
-		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		pkg.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		return
 	}
 
 	recep, err := h.Service.CloseReception(r.Context(), pvzID)
 	if err != nil {
-		pkg.WriteError(w, fmt.Sprintf("failed to close reception:  %s", err.Error()), http.StatusBadRequest)
+		pkg.WriteError(w, fmt.Sprintf("failed to close reception: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 

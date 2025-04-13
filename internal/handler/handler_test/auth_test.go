@@ -1,7 +1,6 @@
 package handler_test
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,21 +15,6 @@ import (
 	"pvz-service/internal/handler/mocks"
 	"pvz-service/internal/model"
 )
-
-type MockAuthService struct {
-	mock.Mock
-}
-
-func (m *MockAuthService) Registration(ctx context.Context, user model.User) (*model.User, error) {
-	args := m.Called(ctx, user)
-
-	userRes, ok := args.Get(0).(*model.User)
-	if !ok && args.Get(0) != nil {
-		panic("Ошибка приведения типа *model.User")
-	}
-
-	return userRes, args.Error(1)
-}
 
 func TestAuthHandler_Register(t *testing.T) {
 	mockAuthService := new(mocks.AuthService)

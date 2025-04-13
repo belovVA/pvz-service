@@ -18,12 +18,6 @@ type AuthService interface {
 	DummyAuth(ctx context.Context, role string) (string, error)
 }
 
-const (
-	ErrBodyRequest   = "Invalid Request Body"
-	ErrRequestFields = "Invalid Request Fields"
-	ErrInvalidRole   = "invalid role in Request"
-)
-
 type AuthHandlers struct {
 	Service AuthService
 }
@@ -117,7 +111,7 @@ func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 
 func validateRole(role string) error {
 	switch role {
-	case employeeRole, moderatorRole:
+	case EmployeeRole, ModeratorRole:
 		return nil
 	}
 

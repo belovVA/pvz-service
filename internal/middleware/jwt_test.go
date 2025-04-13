@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateToken(t *testing.T, claims map[string]interface{}, secret string) string {
+func mockGenerateToken(t *testing.T, claims map[string]interface{}, secret string) string {
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": claims["user_id"],
 		"role":    claims["role"],
@@ -45,7 +45,7 @@ func TestAuthenticate(t *testing.T) {
 		},
 		{
 			name: "valid token",
-			authHeader: "Bearer " + generateToken(t, map[string]interface{}{
+			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
 				"user_id": "123",
 				"role":    "admin",
 			}, secret),
@@ -55,14 +55,14 @@ func TestAuthenticate(t *testing.T) {
 		},
 		{
 			name: "missing user_id in token",
-			authHeader: "Bearer " + generateToken(t, map[string]interface{}{
+			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
 				"role": "admin",
 			}, secret),
 			expectedStatus: http.StatusForbidden,
 		},
 		{
 			name: "missing role in token",
-			authHeader: "Bearer " + generateToken(t, map[string]interface{}{
+			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
 				"user_id": "123",
 			}, secret),
 			expectedStatus: http.StatusForbidden,

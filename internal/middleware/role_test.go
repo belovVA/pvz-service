@@ -9,6 +9,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	moderatorRole = "moderator"
+	employeeRole  = "employee"
+)
+
 func TestRequireRoles(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -18,26 +23,32 @@ func TestRequireRoles(t *testing.T) {
 	}{
 		{
 			name:           "user with valid role",
-			allowedRoles:   []string{"admin", "user"},
-			userRole:       "admin",
+			allowedRoles:   []string{moderatorRole, employeeRole},
+			userRole:       employeeRole,
 			expectedStatus: http.StatusOK,
 		},
 		{
 			name:           "user with invalid role",
-			allowedRoles:   []string{"admin", "user"},
+			allowedRoles:   []string{employeeRole, employeeRole},
 			userRole:       "guest",
 			expectedStatus: http.StatusForbidden,
 		},
 		{
 			name:           "no role",
-			allowedRoles:   []string{"admin", "user"},
+			allowedRoles:   []string{employeeRole, employeeRole},
 			userRole:       "",
 			expectedStatus: http.StatusForbidden,
 		},
 		{
 			name:           "multiple allowed roles",
-			allowedRoles:   []string{"admin", "moderator"},
-			userRole:       "moderator",
+			allowedRoles:   []string{employeeRole, moderatorRole},
+			userRole:       moderatorRole,
+			expectedStatus: http.StatusOK,
+		},
+		{
+			name:           "single allowed roles",
+			allowedRoles:   []string{moderatorRole},
+			userRole:       moderatorRole,
 			expectedStatus: http.StatusOK,
 		},
 	}

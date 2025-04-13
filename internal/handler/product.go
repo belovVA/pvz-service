@@ -14,12 +14,6 @@ import (
 	"pvz-service/internal/model"
 )
 
-const (
-	ElectrType  = "электроника"
-	ClothesType = "одежда"
-	ShoesType   = "обувь"
-)
-
 type ProductService interface {
 	AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error)
 	DeleteProduct(ctx context.Context, pvzID uuid.UUID) error
@@ -39,19 +33,19 @@ func (h *ProductHandlers) CreateNewProduct(w http.ResponseWriter, r *http.Reques
 	var req dto.CreateProductRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, "Invalid Request Body", http.StatusBadRequest)
+		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, "Invalid Request Fields", http.StatusBadRequest)
+		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
 		return
 	}
 
 	pvzID, err := converter.ParseUuid(req.PvzID)
 	if err != nil {
-		pkg.WriteError(w, "Invalid Pvz ID", http.StatusBadRequest)
+		pkg.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		return
 	}
 

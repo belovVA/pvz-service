@@ -9,6 +9,13 @@ import (
 	"pvz-service/internal/handler/pkg"
 )
 
+const ErrInvalidToken = "Invalid token"
+
+const (
+	userIDKey = "user_id"
+	roleKey   = "role"
+)
+
 type JWT struct {
 	secret string
 }
@@ -20,7 +27,7 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			pkg.WriteError(w, "Forbidden", http.StatusForbidden)
+			pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
 			return
 		}
 
@@ -32,29 +39,29 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 		})
 
 		if err != nil {
-			pkg.WriteError(w, "Invalid token", http.StatusForbidden)
+			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
 		if !token.Valid {
-			pkg.WriteError(w, "Invalid token", http.StatusForbidden)
+			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		userID, ok := claims["user_id"].(string)
+		userID, ok := claims[userIDKey].(string)
 		if !ok {
-			pkg.WriteError(w, "Invalid token", http.StatusForbidden)
+			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		role, ok := claims["role"].(string)
+		role, ok := claims[roleKey].(string)
 		if !ok {
-			pkg.WriteError(w, "Invalid token", http.StatusForbidden)
+			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", userID)
-		ctx = context.WithValue(ctx, "role", role)
+		ctx := context.WithValue(r.Context(), userIDKey, userID)
+		ctx = context.WithValue(ctx, roleKey, role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

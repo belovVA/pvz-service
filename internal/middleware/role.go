@@ -6,12 +6,14 @@ import (
 	"pvz-service/internal/handler/pkg"
 )
 
+const ErrForbidden = "forbidden"
+
 func RequireRoles(allowedRoles ...string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctxRole, ok := r.Context().Value("role").(string)
 			if !ok {
-				pkg.WriteError(w, "forbidden", http.StatusForbidden)
+				pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
 				return
 			}
 
@@ -22,7 +24,7 @@ func RequireRoles(allowedRoles ...string) func(http.Handler) http.Handler {
 				}
 			}
 
-			pkg.WriteError(w, "forbidden", http.StatusForbidden)
+			pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
 		})
 	}
 }
