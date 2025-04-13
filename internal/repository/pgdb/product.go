@@ -6,7 +6,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"pvz-service/internal/model"
 	"pvz-service/internal/repository/pgdb/converter"
 	modelRepo "pvz-service/internal/repository/pgdb/model"
@@ -27,10 +26,10 @@ const (
 )
 
 type ProductRepository struct {
-	DB *pgxpool.Pool
+	DB DB
 }
 
-func NewProductRepository(db *pgxpool.Pool) *ProductRepository {
+func NewProductRepository(db DB) *ProductRepository {
 	return &ProductRepository{
 		DB: db,
 	}

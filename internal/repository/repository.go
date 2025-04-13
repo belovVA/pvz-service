@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"pvz-service/internal/repository/pgdb"
 )
 

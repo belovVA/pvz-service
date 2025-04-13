@@ -10,7 +10,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const (
@@ -27,10 +26,10 @@ const (
 )
 
 type UserRepository struct {
-	DB *pgxpool.Pool
+	DB DB
 }
 
-func NewUserRepository(db *pgxpool.Pool) *UserRepository {
+func NewUserRepository(db DB) *UserRepository {
 	return &UserRepository{
 		DB: db,
 	}

@@ -7,7 +7,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"pvz-service/internal/model"
 	"pvz-service/internal/repository/pgdb/converter"
 	modelRepo "pvz-service/internal/repository/pgdb/model"
@@ -30,10 +29,10 @@ const (
 )
 
 type ReceptionRepository struct {
-	DB *pgxpool.Pool
+	DB DB
 }
 
-func NewReceptionRepository(db *pgxpool.Pool) *ReceptionRepository {
+func NewReceptionRepository(db DB) *ReceptionRepository {
 	return &ReceptionRepository{
 		DB: db,
 	}

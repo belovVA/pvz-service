@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"pvz-service/internal/config"
 )
 
@@ -19,7 +19,7 @@ func InitDBPool(ctx context.Context, cfg config.PGConfig) (*pgxpool.Pool, error)
 	bgCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	pool, err := pgxpool.New(bgCtx, dsn)
+	pool, err := pgxpool.Connect(bgCtx, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrConnectionFailed, err)
 	}
