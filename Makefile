@@ -28,3 +28,5 @@ generate_service_mocks:
 	$(MOCKERY) --name=ReceptionService --dir=internal/handler --output=internal/handler/mocks
 	$(MOCKERY) --name=ProductService --dir=internal/handler --output=internal/handler/mocks
 	$(MOCKERY) --name=InfoService --dir=internal/handler --output=internal/handler/mocks
+
+.PHONY: test

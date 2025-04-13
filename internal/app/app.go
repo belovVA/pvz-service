@@ -14,10 +14,11 @@ import (
 	"pvz-service/internal/handler"
 	"pvz-service/internal/repository"
 	"pvz-service/internal/service"
+	"pvz-service/pkg/logger"
+	"pvz-service/pkg/postgres"
 
 	"github.com/go-chi/chi/v5"
 	"pvz-service/internal/config"
-	"pvz-service/pkg"
 )
 
 type App struct {
@@ -26,7 +27,7 @@ type App struct {
 }
 
 func NewApp(ctx context.Context) (*App, error) {
-	pkg.InitLogger()
+	logger := logger.InitLogger()
 
 	pgCfg, err := config.PGConfigLoad()
 	if err != nil {
@@ -43,7 +44,7 @@ func NewApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("error loading jwt config: %w", err)
 	}
 
-	dbPool, err := pkg.InitDBPool(ctx, pgCfg)
+	dbPool, err := postgres.InitDBPool(ctx, pgCfg)
 	if err != nil {
 		return nil, fmt.Errorf("error initializing DB pool: %w", err)
 	}
@@ -55,7 +56,7 @@ func NewApp(ctx context.Context) (*App, error) {
 	serv := service.NewService(repo, jwtCfg.Jwt)
 
 	//init router
-	r := handler.NewRouter(serv, jwtCfg.Jwt)
+	r := handler.NewRouter(serv, jwtCfg.Jwt, logger)
 
 	return &App{
 			router:  r,

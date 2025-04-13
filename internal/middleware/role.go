@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"pvz-service/internal/handler/pkg"
+	"pvz-service/internal/handler/pkg/response"
 )
 
 const ErrForbidden = "forbidden"
@@ -13,7 +13,7 @@ func RequireRoles(allowedRoles ...string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctxRole, ok := r.Context().Value("role").(string)
 			if !ok {
-				pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
+				response.WriteError(w, ErrForbidden, http.StatusForbidden)
 				return
 			}
 
@@ -24,7 +24,7 @@ func RequireRoles(allowedRoles ...string) func(http.Handler) http.Handler {
 				}
 			}
 
-			pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
+			response.WriteError(w, ErrForbidden, http.StatusForbidden)
 		})
 	}
 }

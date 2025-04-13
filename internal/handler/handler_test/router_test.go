@@ -11,13 +11,15 @@ import (
 	"pvz-service/internal/handler"
 	"pvz-service/internal/handler/mocks"
 	"pvz-service/pkg/jwtutils"
+	"pvz-service/pkg/logger"
 )
 
 func TestAccessControl_AllRoutes(t *testing.T) {
 	mockService := new(mocks.Service)
 	secret := "test-secret"
+	logger := logger.InitLogger()
 
-	r := handler.NewRouter(mockService, secret)
+	r := handler.NewRouter(mockService, secret, logger)
 
 	type testCase struct {
 		name           string

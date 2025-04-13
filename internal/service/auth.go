@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"pvz-service/internal/model"
-	"pvz-service/internal/service/pkg"
+	"pvz-service/internal/service/pkg/hash"
 	"pvz-service/pkg/jwtutils"
 )
 
@@ -33,9 +33,9 @@ func NewAuthService(
 
 func (s *AuthService) Registration(ctx context.Context, user model.User) (*model.User, error) {
 
-	hashPass, err := pkg.HashPassword(user.Password)
+	hashPass, err := hash.HashPassword(user.Password)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to hash pass")
 	}
 
 	user.Password = hashPass
@@ -46,7 +46,7 @@ func (s *AuthService) Registration(ctx context.Context, user model.User) (*model
 
 	userID, err := s.userRepository.CreateUser(ctx, &user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create user")
 	}
 
 	return &model.User{
@@ -102,12 +102,12 @@ func (s *AuthService) DummyAuth(ctx context.Context, role string) (string, error
 	if err != nil {
 		_, err = s.Registration(ctx, *user)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to create test user")
 		}
 
 		token, err = s.Authenticate(ctx, *user)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("failed to authenticate test user")
 		}
 	}
 	return token, nil

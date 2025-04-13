@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -21,11 +23,22 @@ const (
 )
 
 const (
+	PvzIDKey       = "pvz_id"
+	ProductIDKey   = "product_id"
+	UserIDKey      = "user_id"
+	ErrorKey       = "error"
+	ReceptionIDKey = "reception_id"
+)
+const (
 	ElectrType  = "электроника"
 	ClothesType = "одежда"
 	ShoesType   = "обувь"
 )
 
+type Logger interface {
+	Info(ctx context.Context, msg string)
+	Error(ctx context.Context, msg string)
+}
 type Service interface {
 	AuthService
 	PvzService
@@ -38,12 +51,12 @@ type Router struct {
 	service Service
 }
 
-func NewRouter(service Service, jwtSecret string) *chi.Mux {
+func NewRouter(service Service, jwtSecret string, logger *slog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 	router := &Router{service: service}
 
 	r.Use(middleware.NewValidator().Middleware)
-
+	r.Use(middleware.ContextLoggerMiddleware(logger))
 	r.Post("/register", http.HandlerFunc(router.registerHandler))
 	r.Post("/login", http.HandlerFunc(router.loginHandler))
 	r.Post("/dummyLogin", http.HandlerFunc(router.dummyLoginHandler))
@@ -73,6 +86,13 @@ func getValidator(r *http.Request) *validator.Validate {
 		return v
 	}
 	return validator.New()
+}
+
+func getLogger(r *http.Request) *slog.Logger {
+	if l, ok := r.Context().Value("logger").(*slog.Logger); ok {
+		return l
+	}
+	return slog.Default() // fallback на глобальный
 }
 
 func (r *Router) registerHandler(w http.ResponseWriter, req *http.Request) {

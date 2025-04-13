@@ -47,13 +47,14 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, typeProduct strin
 		ToSql()
 
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return uuid.Nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(&id)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %s", FailedCreateProduct, err.Error())
+		return uuid.Nil, fmt.Errorf(FailedCreateProduct)
 	}
+
 	return id, nil
 }
 
@@ -67,7 +68,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -95,7 +96,7 @@ func (r *ProductRepository) GetLastProduct(ctx context.Context, receptionID uuid
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -118,13 +119,13 @@ func (r *ProductRepository) DeleteProductByID(ctx context.Context, id uuid.UUID)
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return fmt.Errorf(FailedBuildQuery)
 	}
 
 	// Выполняем запрос
 	cmdTag, err := r.DB.Exec(ctx, query, args...)
 	if err != nil {
-		return fmt.Errorf("%s: %w", FailedExecuteQuery, err)
+		return fmt.Errorf(FailedExecuteQuery)
 	}
 
 	// Проверяем, что была затронута хотя бы одна строка
@@ -144,11 +145,11 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 	rows, err := r.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedExecuteQuery, err)
+		return nil, fmt.Errorf(FailedExecuteQuery)
 	}
 
 	defer rows.Close()
@@ -161,7 +162,7 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 			&productRepo.TypeProduct,
 			&productRepo.ReceptionID,
 		); err != nil {
-			return nil, fmt.Errorf("%s: %w", FailedScanRow, err)
+			return nil, fmt.Errorf("%s", FailedScanRow)
 		}
 
 		product := converter.ToProductFromProductRepo(&productRepo)
@@ -169,7 +170,7 @@ func (r *ProductRepository) GetProductSliceByReceptionID(ctx context.Context, re
 	}
 
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("%w", rows.Err())
+		return nil, fmt.Errorf(FailedScanRow)
 	}
 
 	return result, nil

@@ -83,7 +83,7 @@ func TestProductHandlers_CreateNewProduct(t *testing.T) {
 				mockService.On("AddProduct", mock.Anything, handler.ClothesType, pvzID).Return(nil, errors.New("DB error"))
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedBody:   `{"message":"Failed to create Product: DB error"}`,
+			expectedBody:   `{"message":"Failed add Product: DB error"}`,
 		},
 	}
 

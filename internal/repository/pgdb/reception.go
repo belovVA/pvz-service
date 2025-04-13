@@ -49,11 +49,11 @@ func (r *ReceptionRepository) CreateReception(ctx context.Context, pvzID uuid.UU
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return uuid.Nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	if err = r.DB.QueryRow(ctx, query, args...).Scan(&id); err != nil {
-		return uuid.Nil, fmt.Errorf("%s: %s", FailedCreateReception, err.Error())
+		return uuid.Nil, fmt.Errorf(FailedCreateReception)
 	}
 
 	return id, nil
@@ -69,7 +69,7 @@ func (r *ReceptionRepository) GetReceptionByID(ctx context.Context, id uuid.UUID
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	if err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -96,7 +96,7 @@ func (r *ReceptionRepository) GetLastReception(ctx context.Context, pvzID uuid.U
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	if err = r.DB.QueryRow(ctx, query, args...).Scan(
@@ -119,13 +119,13 @@ func (r *ReceptionRepository) CloseReception(ctx context.Context, receptionID uu
 		PlaceholderFormat(sq.Dollar).
 		ToSql()
 	if err != nil {
-		return fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return fmt.Errorf(FailedBuildQuery)
 	}
 
 	// Выполняем запрос
 	cmdTag, err := r.DB.Exec(ctx, query, args...)
 	if err != nil {
-		return fmt.Errorf("%s: %w", FailedExecuteQuery, err)
+		return fmt.Errorf(FailedExecuteQuery)
 	}
 
 	// Проверяем, что была затронута хотя бы одна строка
@@ -156,12 +156,12 @@ func (r *ReceptionRepository) GetReceptionsSliceWithTimeRange(ctx context.Contex
 
 	query, args, err := queryBuilder.ToSql()
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedBuildQuery, err)
+		return nil, fmt.Errorf(FailedBuildQuery)
 	}
 
 	rows, err := r.DB.Query(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", FailedExecuteQuery, err)
+		return nil, fmt.Errorf(FailedExecuteQuery)
 	}
 
 	defer rows.Close()
@@ -174,7 +174,7 @@ func (r *ReceptionRepository) GetReceptionsSliceWithTimeRange(ctx context.Contex
 			&receptionRepo.IsClosedStatus,
 			&receptionRepo.PvzID,
 		); err != nil {
-			return nil, fmt.Errorf("%s: %w", FailedScanRow, err)
+			return nil, fmt.Errorf(FailedScanRow)
 		}
 
 		reception := converter.ToReceptionFromReceptionRepo(&receptionRepo)
@@ -182,7 +182,7 @@ func (r *ReceptionRepository) GetReceptionsSliceWithTimeRange(ctx context.Contex
 	}
 
 	if rows.Err() != nil {
-		return nil, fmt.Errorf("%w", rows.Err())
+		return nil, fmt.Errorf(FailedScanRow)
 	}
 
 	return result, nil

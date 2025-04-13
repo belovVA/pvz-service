@@ -85,7 +85,7 @@ func TestProductService_AddProduct(t *testing.T) {
 				mockRepo.On("CreateProduct", mock.Anything, mock.Anything, mock.Anything).Return(uuid.UUID{}, errors.New("product creation failed"))
 			},
 			mockGetProductByID: func(mockRepo *mocks.ProductRepository) {},
-			expectedError:      errors.New("product creation failed"),
+			expectedError:      errors.New("failed to create product"),
 			expectedProduct:    nil,
 		},
 	}

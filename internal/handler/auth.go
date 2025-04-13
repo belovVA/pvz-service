@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
-	"pvz-service/internal/handler/pkg"
+	"pvz-service/internal/handler/pkg/response"
 	"pvz-service/internal/model"
 )
 
@@ -30,83 +31,101 @@ func NewAuthHandler(service AuthService) *AuthHandlers {
 
 func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 	var req dto.CreateUserRequest
+	logger := getLogger(r)
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
+		response.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
+		logger.Info(ErrBodyRequest, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
+		response.WriteError(w, ErrRequestFields, http.StatusBadRequest)
+		logger.Info(ErrRequestFields, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	if err := validateRole(req.Role); err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		response.WriteError(w, ErrInvalidRole, http.StatusBadRequest)
+		logger.Info(ErrInvalidRole, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	user, err := h.Service.Registration(r.Context(), *converter.ToUserFromCreateUserRequest(&req))
 	if err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		response.WriteError(w, err.Error(), http.StatusBadRequest)
+		logger.Info("error to register user", slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	resp := converter.ToCreateUserResponseFromUser(user)
-
-	pkg.SuccessJSON(w, resp, http.StatusCreated)
+	logger.InfoContext(r.Context(), "successful register", slog.String(UserIDKey, user.ID.String()))
+	response.SuccessJSON(w, resp, http.StatusCreated)
 }
 
 func (h *AuthHandlers) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginUserRequest
+	logger := getLogger(r)
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, ErrBodyRequest, http.StatusUnauthorized)
+		response.WriteError(w, ErrBodyRequest, http.StatusUnauthorized)
+		logger.Info(ErrBodyRequest, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, ErrRequestFields, http.StatusUnauthorized)
+		response.WriteError(w, ErrRequestFields, http.StatusUnauthorized)
+		logger.Info(ErrRequestFields, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	token, err := h.Service.Authenticate(r.Context(), *converter.ToUserFromLoginUserRequest(&req))
 	if err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusUnauthorized)
+		response.WriteError(w, err.Error(), http.StatusUnauthorized)
+		logger.Info("error to login user", slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	pkg.SuccessText(w, token, http.StatusOK)
+	logger.InfoContext(r.Context(), "successful login", slog.String("email", req.Email))
+
+	response.SuccessText(w, token, http.StatusOK)
 }
 
 func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 	var req dto.TestUserRequest
+	logger := getLogger(r)
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		pkg.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
+		response.WriteError(w, ErrBodyRequest, http.StatusBadRequest)
+		logger.Info(ErrBodyRequest, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	v := getValidator(r)
 	if err := v.Struct(req); err != nil {
-		pkg.WriteError(w, ErrRequestFields, http.StatusBadRequest)
+		response.WriteError(w, ErrRequestFields, http.StatusBadRequest)
+		logger.Info(ErrRequestFields, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	if err := validateRole(req.Role); err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		response.WriteError(w, ErrInvalidRole, http.StatusBadRequest)
+		logger.Info(ErrInvalidRole, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
 	token, err := h.Service.DummyAuth(r.Context(), req.Role)
 	if err != nil {
-		pkg.WriteError(w, err.Error(), http.StatusBadRequest)
+		response.WriteError(w, err.Error(), http.StatusBadRequest)
+		logger.Info("error to login testUser", slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	pkg.SuccessText(w, token, http.StatusOK)
+	response.SuccessText(w, token, http.StatusOK)
+	logger.InfoContext(r.Context(), "successful dummyLogin", slog.String("role", req.Role))
+
 }
 
 func validateRole(role string) error {

@@ -6,14 +6,14 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
-	"pvz-service/internal/handler/pkg"
+	"pvz-service/internal/handler/pkg/response"
 )
 
 const ErrInvalidToken = "Invalid token"
 
 const (
-	userIDKey = "user_id"
-	roleKey   = "role"
+	UserIDKey = "user_id"
+	RoleKey   = "role"
 )
 
 type JWT struct {
@@ -27,7 +27,7 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			pkg.WriteError(w, ErrForbidden, http.StatusForbidden)
+			response.WriteError(w, ErrForbidden, http.StatusForbidden)
 			return
 		}
 
@@ -39,29 +39,29 @@ func (j *JWT) Authenticate(next http.Handler) http.Handler {
 		})
 
 		if err != nil {
-			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
+			response.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
 		if !token.Valid {
-			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
+			response.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		userID, ok := claims[userIDKey].(string)
+		userID, ok := claims[UserIDKey].(string)
 		if !ok {
-			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
+			response.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		role, ok := claims[roleKey].(string)
+		role, ok := claims[RoleKey].(string)
 		if !ok {
-			pkg.WriteError(w, ErrInvalidToken, http.StatusForbidden)
+			response.WriteError(w, ErrInvalidToken, http.StatusForbidden)
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userIDKey, userID)
-		ctx = context.WithValue(ctx, roleKey, role)
+		ctx := context.WithValue(r.Context(), UserIDKey, userID)
+		ctx = context.WithValue(ctx, RoleKey, role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

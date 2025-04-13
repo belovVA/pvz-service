@@ -12,6 +12,7 @@ const (
 	PvzOrReceptionsNotExist = "pvz doesn't exists or it doesn't has any receptions"
 	ProductNotFound         = "products do not exist"
 	FailedProductDelete     = "failed to delete product"
+	FailedProductCreate     = "failed to create product"
 )
 
 type ProductRepository interface {
@@ -46,12 +47,12 @@ func (s *ProductService) AddProduct(ctx context.Context, typeProduct string, pvz
 
 	idProduct, err := s.productRepository.CreateProduct(ctx, typeProduct, reception.ID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(FailedProductCreate)
 	}
 
 	product, err := s.productRepository.GetProductByID(ctx, idProduct)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(FailedProductCreate)
 	}
 
 	return product, nil
