@@ -40,7 +40,7 @@ func TestAuthService_Registration(t *testing.T) {
 					Return(nil, errors.New("not found"))
 
 				repo.On("CreateUser", mock.Anything, mock.MatchedBy(func(u *model.User) bool {
-					return u.Email == testUser.Email && u.Password != "" // пароль будет захеширован
+					return u.Email == testUser.Email && u.Password != password
 				})).Return(uuid.MustParse("123e4567-e89b-12d3-a456-426614174000"), nil)
 			},
 			expectedErr:       nil,

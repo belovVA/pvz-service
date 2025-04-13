@@ -70,7 +70,7 @@ func (s *AuthService) Authenticate(ctx context.Context, user model.User) (string
 
 	token, err := s.generateJWT(current.ID.String(), current.Role)
 
-	return token, nil
+	return token, err
 }
 
 func (s *AuthService) generateJWT(userID string, role string) (string, error) {
