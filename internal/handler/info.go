@@ -13,6 +13,11 @@ import (
 	"pvz-service/internal/model"
 )
 
+const (
+	ErrQueryParameters = "invalid query parameters"
+	ErrConvertParams   = "invalid converting query parameters"
+)
+
 type InfoService interface {
 	GetInfoPvz(ctx context.Context, query *model.PvzInfoQuery) ([]*model.Pvz, error)
 }
@@ -34,13 +39,13 @@ func (h *InfoHandlers) GetInfo(w http.ResponseWriter, r *http.Request) {
 	decoder.IgnoreUnknownKeys(true)
 
 	if err := decoder.Decode(&req, r.URL.Query()); err != nil {
-		pkg.WriteError(w, "invalid query parameters", http.StatusBadRequest)
+		pkg.WriteError(w, ErrQueryParameters, http.StatusBadRequest)
 		return
 	}
 
 	pvzInfo, err := converter.ToPvzInfoQueryFromPvzInfoResponse(&req)
 	if err != nil {
-		pkg.WriteError(w, "invalid converting query parameters", http.StatusBadRequest)
+		pkg.WriteError(w, ErrConvertParams, http.StatusBadRequest)
 		return
 	}
 

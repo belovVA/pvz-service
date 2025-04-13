@@ -69,7 +69,7 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
 		},
 		{
-			name:    "ошибка при создании приёма - сервис не смог создать",
+			name:    "ошибка при создании - сервис не смог создать",
 			reqBody: fmt.Sprintf(`{"pvzID": "%s"}`, testPvzID2),
 			mockSetup: func() {
 				mockReceptionService.On("CreateReception", mock.Anything, testPvzID2).Return(nil, fmt.Errorf("failed to create reception"))
