@@ -2,7 +2,7 @@ MOCKERY=/home/vladimir/go/bin/mockery
 PKGS=$(shell go list ./... | grep -vE '/(test)')
 COVERPKG=$(shell go list ./... | grep -vE '/(mocks|test)' | paste -sd, -) # Убираем моки из покрытия
 
-.PHONY: run build-up build-down test cover
+.PHONY: build-up build-down test cover
 run:
 	go run cmd/pvz-service/main.go
 
