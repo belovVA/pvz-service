@@ -39,40 +39,50 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			name:    "успешное создание нового приёма",
 			reqBody: fmt.Sprintf(`{"pvzID": "%s"}`, testPvzID),
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(&model.Reception{
-					ID:       testRecepID,
-					DateTime: fixedTime,
-					IsClosed: false,
-					PvzID:    testPvzID,
-				}, nil)
+				mockReceptionService.On("CreateReception",
+					mock.Anything, model.Reception{PvzID: testPvzID}).
+					Return(&model.Reception{
+						ID:       testRecepID,
+						DateTime: fixedTime,
+						IsClosed: false,
+						PvzID:    testPvzID,
+					}, nil)
 			},
 			expectedStatus: http.StatusCreated,
 			expectedBody: fmt.Sprintf(`{"id":"%s","dateTime":"%s",  "pvzId":"%s", "status":"%s"}`,
-				testRecepID.String(), fixedTime.Format(time.RFC3339), testPvzID.String(), "in_progress"),
+				testRecepID.String(),
+				fixedTime.Format(time.RFC3339),
+				testPvzID.String(),
+				"in_progress"),
 		},
 		{
-			name:    "ошибка при обработке тела запроса - неверный формат",
-			reqBody: fmt.Sprintf(`{pvzID: "%s"}`, testPvzID), // неверный формат JSON
-			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(nil, nil)
-			},
+			name:           "ошибка при обработке тела запроса - неверный формат",
+			reqBody:        fmt.Sprintf(`{pvzID: "%s"}`, testPvzID), // неверный формат JSON
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
 		},
 		{
-			name:    "ошибка при проверке полей запроса - неверные данные",
-			reqBody: fmt.Sprintf(`{"role":"employee"}`),
-			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(nil, nil)
-			},
+			name:           "ошибка при проверке полей запроса - неверные данные",
+			reqBody:        fmt.Sprintf(`{"role":"employee"}`),
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
+		},
+		{
+			name:           "ошибка при проверке полей запроса - неверные uuid",
+			reqBody:        fmt.Sprintf(`{"pvzID": "%s"}`, "55"),
+			mockSetup:      func() {},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrUUIDParsing),
 		},
 		{
 			name:    "ошибка при создании - сервис не смог создать",
 			reqBody: fmt.Sprintf(`{"pvzID": "%s"}`, testPvzID2),
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID2}).Return(nil, fmt.Errorf("failed to create reception"))
+				mockReceptionService.On("CreateReception",
+					mock.Anything, model.Reception{PvzID: testPvzID2}).
+					Return(nil, fmt.Errorf("failed to create reception"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"failed to create Reception: failed to create reception"}`,

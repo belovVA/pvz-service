@@ -108,6 +108,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   handler.ErrConvertParams,
 		},
+
 		{
 			name:           "невалидная дата2",
 			queryParams:    invalidDateQuery2,
@@ -126,12 +127,13 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			name:        "ошибка сервиса",
 			queryParams: errorQuery,
 			mockSetup: func(s *mocks.InfoService) {
-				s.On("GetInfoPvz", mock.Anything, &model.PvzInfoQuery{
-					StartDate: parseRFC3339(startDate),
-					EndDate:   parseRFC3339(endDate),
-					Page:      1,
-					Limit:     10, // по умолчанию
-				}).Return(nil, errors.New("some error"))
+				s.On("GetInfoPvz",
+					mock.Anything, &model.PvzInfoQuery{
+						StartDate: parseRFC3339(startDate),
+						EndDate:   parseRFC3339(endDate),
+						Page:      1,
+						Limit:     10, // по умолчанию
+					}).Return(nil, errors.New("some error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "Failed to get PVZ: some error",
@@ -140,12 +142,13 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			name:        "успешный запрос c несколькими пвз",
 			queryParams: validQuery,
 			mockSetup: func(s *mocks.InfoService) {
-				s.On("GetInfoPvz", mock.Anything, &model.PvzInfoQuery{
-					StartDate: parseRFC3339(startDate),
-					EndDate:   parseRFC3339(endDate),
-					Page:      1,
-					Limit:     5,
-				}).Return([]*model.Pvz{&pvz, &pvz2}, nil)
+				s.On("GetInfoPvz",
+					mock.Anything, &model.PvzInfoQuery{
+						StartDate: parseRFC3339(startDate),
+						EndDate:   parseRFC3339(endDate),
+						Page:      1,
+						Limit:     5,
+					}).Return([]*model.Pvz{&pvz, &pvz2}, nil)
 			},
 			expectedStatus: http.StatusOK,
 		},

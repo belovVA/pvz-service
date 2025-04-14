@@ -50,14 +50,22 @@ func TestProductHandlers_CreateNewProduct(t *testing.T) {
 					model.Pvz{ID: pvzID}).Return(product, nil)
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody:   fmt.Sprintf(`{"id":"%s","receptionId":"%s","type":"%s","dateTime":"%s"}`, product.ID, testRecepID, handler.ElectrType, product.DateTime.Format(time.RFC3339)),
+			expectedBody: fmt.Sprintf(`{"id":"%s","receptionId":"%s","type":"%s","dateTime":"%s"}`,
+				product.ID, testRecepID,
+				handler.ElectrType,
+				product.DateTime.Format(time.RFC3339)),
 		},
 		{
-			name: "невалидное тело запроса",
-			body: `{typeProduct:"electronic"}`, // неправильно оформлен JSON
-			mockSetup: func() {
-				// нет вызова сервиса
-			},
+			name:           "невалидные поля",
+			body:           fmt.Sprintf(`{"pvzId":"%s"}`, pvzID),
+			mockSetup:      func() {},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
+		},
+		{
+			name:           "невалидное тело запроса",
+			body:           `{typeProduct:"electronic"}`, // неправильно оформлен JSON
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
 		},
@@ -65,7 +73,6 @@ func TestProductHandlers_CreateNewProduct(t *testing.T) {
 			name: "невалидный UUID",
 			body: `{"type":"electronic","pvzId":"not-a-uuid"}`,
 			mockSetup: func() {
-				// нет вызова сервиса
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrUUIDParsing),
@@ -127,7 +134,9 @@ func TestProductHandlers_RemoveLastProduct(t *testing.T) {
 			name:      "успешное удаление",
 			pvzIdPath: validPvzID.String(),
 			mockSetup: func() {
-				mockService.On("DeleteProduct", mock.Anything, model.Pvz{ID: validPvzID}).Return(nil)
+				mockService.On("DeleteProduct",
+					mock.Anything, model.Pvz{ID: validPvzID}).
+					Return(nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   ``,
@@ -143,7 +152,9 @@ func TestProductHandlers_RemoveLastProduct(t *testing.T) {
 			name:      "ошибка при удалении",
 			pvzIdPath: validPvzID2.String(),
 			mockSetup: func() {
-				mockService.On("DeleteProduct", mock.Anything, model.Pvz{ID: validPvzID2}).Return(errors.New("delete error"))
+				mockService.On("DeleteProduct",
+					mock.Anything, model.Pvz{ID: validPvzID2}).
+					Return(errors.New("delete error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"failed to delete product:  delete error"}`,

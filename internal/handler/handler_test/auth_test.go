@@ -34,11 +34,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			name:    "успешная регистрация",
 			reqBody: `{"email": "test@example.com", "password": "password123", "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Registration", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-					Role:     "employee",
-				}).Return(&model.User{
+				mockAuthService.On("Registration",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+						Role:     "employee",
+					}).Return(&model.User{
 					Email:    "test@example.com",
 					Password: "password123",
 					Role:     "employee",
@@ -51,11 +52,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			name:    "ошибка регистрации - invalid role",
 			reqBody: `{"email": "test@example.com", "password": "password123", "role": "admin"}`,
 			mockSetup: func() {
-				mockAuthService.On("Registration", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-					Role:     "employee",
-				}).Return(nil, errors.New(""))
+				mockAuthService.On("Registration",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+						Role:     "employee",
+					}).Return(nil, errors.New(""))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrInvalidRole),
@@ -64,11 +66,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			name:    "ошибка регистрации - неверные поля запроса",
 			reqBody: `{"email": "test@example.com", "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Registration", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-					Role:     "employee",
-				}).Return(nil, errors.New("registration failed"))
+				mockAuthService.On("Registration",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+						Role:     "employee",
+					}).Return(nil, errors.New("registration failed"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
@@ -77,11 +80,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			name:    "ошибка регистрации - неверное тело запроса",
 			reqBody: `{"email": "test@example.com", :'inv'\rr\t "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Registration", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-					Role:     "employee",
-				}).Return(nil, errors.New(""))
+				mockAuthService.On("Registration",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+						Role:     "employee",
+					}).Return(nil, errors.New(""))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
@@ -90,11 +94,12 @@ func TestAuthHandler_Register(t *testing.T) {
 			name:    "ошибка регистрация - ошибка сервера",
 			reqBody: `{"email": "test2@example.com", "password": "password123", "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Registration", mock.Anything, model.User{
-					Email:    "test2@example.com",
-					Password: "password123",
-					Role:     "employee",
-				}).Return(nil, fmt.Errorf("server error"))
+				mockAuthService.On("Registration",
+					mock.Anything, model.User{
+						Email:    "test2@example.com",
+						Password: "password123",
+						Role:     "employee",
+					}).Return(nil, fmt.Errorf("server error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"server error"}`,
@@ -140,10 +145,11 @@ func TestAuthHandler_Authenticate(t *testing.T) {
 			name:    "успешная авторизация",
 			reqBody: `{"email": "test@example.com", "password": "password123"}`,
 			mockSetup: func() {
-				mockAuthService.On("Authenticate", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-				}).Return("some-jwt-token",
+				mockAuthService.On("Authenticate",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+					}).Return("some-jwt-token",
 					nil)
 			},
 			expectedStatus: http.StatusOK,
@@ -153,10 +159,11 @@ func TestAuthHandler_Authenticate(t *testing.T) {
 			name:    "ошибка авторизации - неверное тело запроса",
 			reqBody: `{"email": "test@example.com", "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Authenticate", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-				}).Return(mock.Anything, nil)
+				mockAuthService.On("Authenticate",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+					}).Return(mock.Anything, nil)
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
@@ -165,10 +172,11 @@ func TestAuthHandler_Authenticate(t *testing.T) {
 			name:    "ошибка авторизации - неверное тело запроса",
 			reqBody: `{"email": "test@example.com", :'inv'\rr\t "role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("Authenticate", mock.Anything, model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-				}).Return(mock.Anything, nil)
+				mockAuthService.On("Authenticate",
+					mock.Anything, model.User{
+						Email:    "test@example.com",
+						Password: "password123",
+					}).Return(mock.Anything, nil)
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
@@ -177,10 +185,11 @@ func TestAuthHandler_Authenticate(t *testing.T) {
 			name:    "ошибка авторизациии - ошибка сервера",
 			reqBody: `{"email": "test2@example.com", "password": "password123"}`,
 			mockSetup: func() {
-				mockAuthService.On("Authenticate", mock.Anything, model.User{
-					Email:    "test2@example.com",
-					Password: "password123",
-				}).Return("", fmt.Errorf("server error"))
+				mockAuthService.On("Authenticate",
+					mock.Anything, model.User{
+						Email:    "test2@example.com",
+						Password: "password123",
+					}).Return("", fmt.Errorf("server error"))
 			},
 			expectedStatus: http.StatusUnauthorized,
 			expectedBody:   fmt.Sprintf(`{"message":"server error"}`),
@@ -230,32 +239,31 @@ func TestAuthHandler_DummyLogin(t *testing.T) {
 			name:    "успешная тестовая авторизация",
 			reqBody: `{"role": "employee"}`,
 			mockSetup: func() {
-				mockAuthService.On("DummyAuth", mock.Anything, model.User{Role: handler.EmployeeRole}).Return("some-jwt-token", nil)
+				mockAuthService.On("DummyAuth",
+					mock.Anything, model.User{Role: handler.EmployeeRole}).
+					Return("some-jwt-token", nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   `some-jwt-token`,
 		},
 		{
-			name:    "ошибка тестовой авторизации - invalid role",
-			reqBody: `{"role": "admin"}`,
-			mockSetup: func() {
-			},
+			name:           "ошибка тестовой авторизации - invalid role",
+			reqBody:        `{"role": "admin"}`,
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrInvalidRole),
 		},
 		{
-			name:    "ошибка тестовой авторизации - неверные поля запроса",
-			reqBody: `{}`,
-			mockSetup: func() {
-			},
+			name:           "ошибка тестовой авторизации - неверные поля запроса",
+			reqBody:        `{}`,
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
 		},
 		{
-			name:    "ошибка тестовой авторизации - неверное тело запроса",
-			reqBody: `{"email": "test@example.com", :'inv'\rr\t "role": "employee"}`,
-			mockSetup: func() {
-			},
+			name:           "ошибка тестовой авторизации - неверное тело запроса",
+			reqBody:        `{"email": "test@example.com", :'inv'\rr\t "role": "employee"}`,
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
 		},
@@ -263,8 +271,9 @@ func TestAuthHandler_DummyLogin(t *testing.T) {
 			name:    "ошибочная тестовая авторизация - server errpr",
 			reqBody: `{"role": "moderator"}`,
 			mockSetup: func() {
-				mockAuthService.On("DummyAuth", mock.Anything, model.User{Role: handler.ModeratorRole}).Return(
-					"", fmt.Errorf("server error"))
+				mockAuthService.On("DummyAuth",
+					mock.Anything, model.User{Role: handler.ModeratorRole}).
+					Return("", fmt.Errorf("server error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"server error"}`),

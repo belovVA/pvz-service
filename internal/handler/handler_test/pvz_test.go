@@ -37,41 +37,49 @@ func TestPvzHandler_Create(t *testing.T) {
 			name:    "успешное создание",
 			reqBody: fmt.Sprintf(`{"city": "%s"}`, handler.KazanRU),
 			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(&model.Pvz{
-					ID:               testPvzID,
-					RegistrationDate: fixedTime,
-					City:             handler.KazanRU,
-				}, nil)
+				mockPvzService.On("AddNewPvz",
+					mock.Anything, model.Pvz{City: handler.KazanRU}).
+					Return(&model.Pvz{
+						ID:               testPvzID,
+						RegistrationDate: fixedTime,
+						City:             handler.KazanRU,
+					}, nil)
 			},
 			expectedStatus: http.StatusCreated,
-			expectedBody:   fmt.Sprintf(`{"id":"%s","registrationDate" :"%s","city":"%s"}`, testPvzID.String(), fixedTime.Format(time.RFC3339), handler.KazanRU),
+			expectedBody: fmt.Sprintf(`{"id":"%s","registrationDate" :"%s","city":"%s"}`,
+				testPvzID.String(), fixedTime.Format(time.RFC3339), handler.KazanRU),
 		},
 		{
-			name:    "ошибка создания - invalidBody",
-			reqBody: fmt.Sprintf(`{city: "%s"}`, handler.KazanRU),
-			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
-			},
+			name:           "ошибка создания - invalidBody",
+			reqBody:        fmt.Sprintf(`{city: "%s"}`, handler.KazanRU),
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
 		},
 		{
-			name:    "ошибка создания - invalidFields",
-			reqBody: fmt.Sprintf(`{"role":"employee"}`),
-			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
-			},
+			name:           "ошибка создания - invalidFields",
+			reqBody:        fmt.Sprintf(`{"role":"employee"}`),
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
 		},
 		{
-			name:    "ошибка создания - InvalidCity",
-			reqBody: fmt.Sprintf(`{"city": "%s"}`, "Nizhnekamsk"),
-			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
-			},
+			name:           "ошибка создания - InvalidCity",
+			reqBody:        fmt.Sprintf(`{"city": "%s"}`, "Nizhnekamsk"),
+			mockSetup:      func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrInvalidCity),
+		},
+		{
+			name:    "ошибка создания - ошибка сервера",
+			reqBody: fmt.Sprintf(`{"city": "%s"}`, handler.SpbRU),
+			mockSetup: func() {
+				mockPvzService.On("AddNewPvz",
+					mock.Anything, model.Pvz{City: handler.SpbRU}).
+					Return(nil, fmt.Errorf("server error"))
+			},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   fmt.Sprintf(`{"message":"failed to create PVZ: server error"}`),
 		},
 	}
 	for _, tt := range tests {
