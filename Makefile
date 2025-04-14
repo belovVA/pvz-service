@@ -1,8 +1,8 @@
 MOCKERY=/home/vladimir/go/bin/mockery
-PKGS=$(shell go list ./... | grep -vE '/(mocks|test)')
-COVERPKG=$(shell go list ./... | grep -vE '/(mocks|test)' | paste -sd, -)
+PKGS=$(shell go list ./... | grep -vE '/(test)')
+COVERPKG=$(shell go list ./... | grep -vE '/(mocks|test)' | paste -sd, -) # Убираем моки из покрытия
 
-
+.PHONY: run build-up build-down test cover
 run:
 	go run cmd/pvz-service/main.go
 
@@ -18,6 +18,7 @@ test:
 
 cover:
 	go tool cover -func=coverage.out
+	go tool cover -html=coverage.out
 
 
 generate_repo_mocks:
@@ -37,4 +38,3 @@ integrate_test:
 	# Run the Go service in the background
 	go test test/integration_test.go
 
-.PHONY: test

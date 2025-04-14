@@ -3,6 +3,7 @@ package service_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -191,6 +192,7 @@ func TestAuthService_DummyAuth(t *testing.T) {
 	hashedPassEmployee, _ := bcrypt.GenerateFromPassword([]byte(service.EmployeeRole), bcrypt.DefaultCost)
 
 	moderatorID := uuid.New()
+	employeeID := uuid.New()
 
 	tests := []struct {
 		name       string
@@ -221,10 +223,44 @@ func TestAuthService_DummyAuth(t *testing.T) {
 			setupMocks: func(repo *mocks.UserRepository) {
 				repo.On("GetUserByEmail", mock.Anything, service.EmployeeEmail).
 					Return(&model.User{
-						ID:       moderatorID,
+						ID:       employeeID,
 						Email:    service.EmployeeEmail,
 						Password: string(hashedPassEmployee),
-						Role:     service.EmployeeEmail,
+						Role:     service.EmployeeRole,
+					}, nil).Once()
+			},
+			wantErr: false,
+		},
+		{
+			name:  "employee login success in first time",
+			role:  service.EmployeeRole,
+			email: service.EmployeeEmail,
+			setupMocks: func(repo *mocks.UserRepository) {
+				// В первом вызове GetUserByEmail возвращаем ошибку "user not found"
+				repo.On("GetUserByEmail", mock.Anything, service.EmployeeEmail).
+					Return(nil, fmt.Errorf("user not found")).Once()
+
+				// Во втором вызове GetUserByEmail снова возвращаем ошибку, так как на момент второго вызова еще нет пользователя
+				repo.On("GetUserByEmail", mock.Anything, service.EmployeeEmail).
+					Return(nil, fmt.Errorf("user not found")).Once()
+
+				// Хэшируем пароль заранее и используем его в моке
+
+				repo.On("CreateUser", mock.Anything, mock.MatchedBy(func(user *model.User) bool {
+					// Проверяем, что поля структуры соответствуют ожидаемым значениям
+					return user.Email == service.EmployeeEmail &&
+						user.Role == service.EmployeeRole &&
+						user.Password != "" // Игнорируем проверку на конкретный хэш пароля
+				})).
+					Return(employeeID, nil).Once()
+
+				// Теперь, когда пользователь создан, на последующих вызовах GetUserByEmail возвращаем созданного пользователя
+				repo.On("GetUserByEmail", mock.Anything, service.EmployeeEmail).
+					Return(&model.User{
+						ID:       employeeID,
+						Email:    service.EmployeeEmail,
+						Password: string(hashedPassEmployee),
+						Role:     service.EmployeeRole,
 					}, nil).Once()
 			},
 			wantErr: false,
