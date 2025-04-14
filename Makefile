@@ -1,4 +1,6 @@
 MOCKERY=/home/vladimir/go/bin/mockery
+PKGS=$(shell go list ./... | grep -vE '/(mocks|test)')
+COVERPKG=$(shell go list ./... | grep -vE '/(mocks|test)' | paste -sd, -)
 
 
 run:
@@ -12,7 +14,7 @@ build-up:
 
 test:
 	go clean -testcache
-	go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
+	go test -covermode=atomic -coverpkg=$(COVERPKG) -coverprofile=coverage.out $(PKGS)
 
 cover:
 	go tool cover -func=coverage.out
@@ -30,5 +32,9 @@ generate_service_mocks:
 	$(MOCKERY) --name=ReceptionService --dir=internal/handler --output=internal/handler/mocks
 	$(MOCKERY) --name=ProductService --dir=internal/handler --output=internal/handler/mocks
 	$(MOCKERY) --name=InfoService --dir=internal/handler --output=internal/handler/mocks
+
+integrate_test:
+	# Run the Go service in the background
+	go test test/integration_test.go
 
 .PHONY: test
