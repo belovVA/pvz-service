@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS pvz (
     );
 
 CREATE INDEX IF NOT EXISTS idx_pvz_city ON pvz(city);
+CREATE INDEX IF NOT EXISTS idx_pvz_registration_date ON pvz (registration_date);

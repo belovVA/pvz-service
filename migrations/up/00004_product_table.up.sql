@@ -10,3 +10,5 @@ CREATE TABLE IF NOT EXISTS product (
 
 CREATE INDEX IF NOT EXISTS idx_product_reception_id ON product(reception_id);
 CREATE INDEX IF NOT EXISTS idx_product_date_time ON product(date_time);
+CREATE INDEX IF NOT EXISTS idx_product_reception_id_date_time
+    ON product (reception_id, date_time);

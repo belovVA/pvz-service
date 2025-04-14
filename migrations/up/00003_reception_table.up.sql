@@ -10,3 +10,5 @@ CREATE TABLE IF NOT EXISTS reception (
 
 CREATE INDEX IF NOT EXISTS idx_reception_pvz_id ON reception(pvz_id);
 CREATE INDEX IF NOT EXISTS idx_reception_date_time ON reception(date_time);
+CREATE INDEX IF NOT EXISTS idx_reception_pvz_id_date_time
+    ON reception (pvz_id, date_time);
