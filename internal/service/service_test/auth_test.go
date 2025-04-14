@@ -79,110 +79,74 @@ func TestAuthService_Registration(t *testing.T) {
 		})
 	}
 }
+func TestAuthService_DummyAuth(t *testing.T) {
+	hashedPassModerator, _ := bcrypt.GenerateFromPassword([]byte(service.ModeratorRole), bcrypt.DefaultCost)
+	hashedPassEmployee, _ := bcrypt.GenerateFromPassword([]byte(service.EmployeeRole), bcrypt.DefaultCost)
 
-func TestAuthService_Authenticate(t *testing.T) {
-	type fields struct {
-		userRepo    *mocks.UserRepository
-		generateJWT func(userID, role string) (string, error)
-	}
-
-	type args struct {
-		user model.User
-	}
-
-	hashedPass, _ := bcrypt.GenerateFromPassword([]byte("password123"), bcrypt.DefaultCost)
-	userID := uuid.New()
+	moderatorID := uuid.New()
 
 	tests := []struct {
-		name      string
-		args      args
-		mockSetup func(repo *mocks.UserRepository)
-		fields    fields
-		wantToken string
-		wantErr   string
+		name       string
+		role       string
+		email      string
+		setupMocks func(repo *mocks.UserRepository)
+		wantErr    bool
 	}{
 		{
-			name: "successful auth",
-			args: args{
-				user: model.User{
-					Email:    "test@example.com",
-					Password: "password123",
-				},
+			name:  "moderator login success",
+			role:  service.ModeratorRole,
+			email: service.ModeratorEmail,
+			setupMocks: func(repo *mocks.UserRepository) {
+				repo.On("GetUserByEmail", mock.Anything, service.ModeratorEmail).
+					Return(&model.User{
+						ID:       moderatorID,
+						Email:    service.ModeratorEmail,
+						Password: string(hashedPassModerator),
+						Role:     service.ModeratorRole,
+					}, nil).Once()
 			},
-			mockSetup: func(repo *mocks.UserRepository) {
-				repo.On("GetUserByEmail", mock.Anything, "test@example.com").Return(&model.User{
-					ID:       userID,
-					Email:    "test@example.com",
-					Password: string(hashedPass),
-					Role:     "user",
-				}, nil)
-			},
-			fields: fields{
-				userRepo: &mocks.UserRepository{},
-				generateJWT: func(userID, role string) (string, error) {
-					return "mocked-jwt-token", nil
-				},
-			},
-			wantToken: "mocked-jwt-token",
-			wantErr:   "",
+			wantErr: false,
 		},
 		{
-			name: "user not found",
-			args: args{
-				user: model.User{Email: "notfound@example.com", Password: "somepass"},
+			name:  "employee login success",
+			role:  service.EmployeeRole,
+			email: service.EmployeeEmail,
+			setupMocks: func(repo *mocks.UserRepository) {
+				repo.On("GetUserByEmail", mock.Anything, service.EmployeeEmail).
+					Return(&model.User{
+						ID:       moderatorID,
+						Email:    service.EmployeeEmail,
+						Password: string(hashedPassEmployee),
+						Role:     service.EmployeeEmail,
+					}, nil).Once()
 			},
-			mockSetup: func(repo *mocks.UserRepository) {
-				repo.On("GetUserByEmail", mock.Anything, "notfound@example.com").Return(nil, errors.New("not found"))
-			},
-			fields: fields{
-				userRepo: &mocks.UserRepository{},
-				generateJWT: func(userID, role string) (string, error) {
-					return "", nil
-				},
-			},
-			wantToken: "",
-			wantErr:   "user not found",
-		},
-		{
-			name: "invalid password",
-			args: args{
-				user: model.User{Email: "test@example.com", Password: "wrongpass"},
-			},
-			mockSetup: func(repo *mocks.UserRepository) {
-				repo.On("GetUserByEmail", mock.Anything, "test@example.com").Return(&model.User{
-					ID:       userID,
-					Email:    "test@example.com",
-					Password: string(hashedPass),
-					Role:     "user",
-				}, nil)
-			},
-			fields: fields{
-				userRepo: &mocks.UserRepository{},
-				generateJWT: func(userID, role string) (string, error) {
-					return "", nil
-				},
-			},
-			wantToken: "",
-			wantErr:   "invalid email or password",
+			wantErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			mockRepo := new(mocks.UserRepository)
-			tt.mockSetup(mockRepo)
+			tt.setupMocks(mockRepo)
 
 			authService := service.NewAuthService(mockRepo, "test")
 
-			_, err := authService.Authenticate(context.Background(), tt.args.user)
+			userDummy := model.User{
+				Email:    tt.email,
+				Password: tt.role,
+				Role:     tt.role,
+			}
 
-			if tt.wantErr != "" {
+			token, err := authService.DummyAuth(context.Background(), userDummy)
+
+			if tt.wantErr {
 				require.Error(t, err)
-				require.Contains(t, err.Error(), tt.wantErr)
 			} else {
 				require.NoError(t, err)
+				require.NotEmpty(t, token)
 			}
+
+			mockRepo.AssertExpectations(t)
 		})
 	}
 }

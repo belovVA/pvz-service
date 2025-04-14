@@ -13,6 +13,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	EmployeeRole  = "employee"
+	EmployeeEmail = "employee@test.com"
+
+	ModeratorRole  = "moderator"
+	ModeratorEmail = "moderator@test.com"
+)
+
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *model.User) (uuid.UUID, error)
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
@@ -100,30 +108,23 @@ func (s *AuthService) DummyAuth(ctx context.Context, user model.User) (string, e
 }
 
 func getTestUserByRole(role string) (*model.User, error) {
-	const (
-		employeeRole  = "employee"
-		employeeEmail = "employee@test.com"
-
-		moderatorRole  = "moderator"
-		moderatorEmail = "moderator@test.com"
-	)
 	switch role {
-	case employeeRole:
+	case EmployeeRole:
 		return &model.User{
-			Email:    employeeEmail,
+			Email:    EmployeeEmail,
 			Password: role,
-			Role:     employeeRole,
+			Role:     EmployeeRole,
 		}, nil
 
-	case moderatorRole:
+	case ModeratorRole:
 		return &model.User{
-			Email:    moderatorEmail,
+			Email:    ModeratorEmail,
 			Password: role,
-			Role:     moderatorRole,
+			Role:     ModeratorRole,
 		}, nil
 	}
 
-	return nil, fmt.Errorf("forbidden role")
+	return nil, fmt.Errorf("forbidden role %s", role)
 }
 
 func (s *AuthService) generateJWT(userID string, role string) (string, error) {
