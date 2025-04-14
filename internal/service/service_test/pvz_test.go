@@ -74,7 +74,7 @@ func TestPvzService_AddNewPvz(t *testing.T) {
 			tt.mockGetPvzByID(mockRepo)
 
 			// Выполняем тестируемую функцию
-			pvz, err := service.AddNewPvz(context.Background(), tt.city)
+			pvz, err := service.AddNewPvz(context.Background(), model.Pvz{City: tt.city})
 
 			// Проверяем ошибки
 			if tt.expectedError != nil {

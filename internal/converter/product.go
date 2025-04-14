@@ -13,3 +13,9 @@ func ToProductResponseFromProduct(product *model.Product) *dto.ProductResponse {
 		ReceptionID: product.ReceptionID.String(),
 	}
 }
+
+func ToProductFromCreateProductRequest(request *dto.CreateProductRequest) *model.Product {
+	return &model.Product{
+		TypeProduct: request.TypeProduct,
+	}
+}

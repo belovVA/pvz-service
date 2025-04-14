@@ -23,11 +23,11 @@ const (
 )
 
 const (
-	PvzIDKey       = "pvz_id"
-	ProductIDKey   = "product_id"
-	UserIDKey      = "user_id"
+	PvzIDKey       = "pvzId"
+	ProductIDKey   = "productId"
+	UserIDKey      = "userId"
 	ErrorKey       = "error"
-	ReceptionIDKey = "reception_id"
+	ReceptionIDKey = "receptionId"
 )
 const (
 	ElectrType  = "электроника"

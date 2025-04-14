@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"pvz-service/internal/handler"
 	"pvz-service/internal/handler/mocks"
 	"pvz-service/pkg/jwtutils"
 	"pvz-service/pkg/logger"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAccessControl_AllRoutes(t *testing.T) {
@@ -63,8 +64,8 @@ func TestAccessControl_AllRoutes(t *testing.T) {
 			if tt.role != "" {
 
 				token, err := jwtutils.Generate(map[string]interface{}{
-					"user_id": "test-user",
-					"role":    tt.role,
+					"userId": "test-user",
+					"role":   tt.role,
 				}, time.Hour, secret)
 				require.NoError(t, err)
 				req.Header.Set("Authorization", "Bearer "+token)

@@ -25,7 +25,7 @@ const (
 )
 
 type PvzService interface {
-	AddNewPvz(ctx context.Context, city string) (*model.Pvz, error)
+	AddNewPvz(ctx context.Context, pvz model.Pvz) (*model.Pvz, error)
 }
 
 type PVZHandlers struct {
@@ -55,13 +55,14 @@ func (h *PVZHandlers) CreateNewPvz(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validateCity(req.City); err != nil {
+	pvzModel := converter.ToPvzFromCreatePvzRequest(&req)
+	if err := validateCity(pvzModel.City); err != nil {
 		response.WriteError(w, ErrInvalidCity, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrInvalidCity, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	pvz, err := h.Service.AddNewPvz(r.Context(), req.City)
+	pvz, err := h.Service.AddNewPvz(r.Context(), *pvzModel)
 	if err != nil {
 		response.WriteError(w, fmt.Sprintf("%s: %s", ErrCreatePvz, err.Error()), http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrCreatePvz, slog.String(ErrorKey, err.Error()))

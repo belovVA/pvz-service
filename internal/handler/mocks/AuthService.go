@@ -43,9 +43,9 @@ func (_m *AuthService) Authenticate(ctx context.Context, user model.User) (strin
 	return r0, r1
 }
 
-// DummyAuth provides a mock function with given fields: ctx, role
-func (_m *AuthService) DummyAuth(ctx context.Context, role string) (string, error) {
-	ret := _m.Called(ctx, role)
+// DummyAuth provides a mock function with given fields: ctx, user
+func (_m *AuthService) DummyAuth(ctx context.Context, user model.User) (string, error) {
+	ret := _m.Called(ctx, user)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DummyAuth")
@@ -53,17 +53,17 @@ func (_m *AuthService) DummyAuth(ctx context.Context, role string) (string, erro
 
 	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (string, error)); ok {
-		return rf(ctx, role)
+	if rf, ok := ret.Get(0).(func(context.Context, model.User) (string, error)); ok {
+		return rf(ctx, user)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) string); ok {
-		r0 = rf(ctx, role)
+	if rf, ok := ret.Get(0).(func(context.Context, model.User) string); ok {
+		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, role)
+	if rf, ok := ret.Get(1).(func(context.Context, model.User) error); ok {
+		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -102,7 +102,8 @@ func TestProductService_AddProduct(t *testing.T) {
 			tt.mockGetProductByID(mockProductRepo)
 
 			// Выполняем тестируемую функцию
-			product, err := service.AddProduct(context.Background(), tt.typeProduct, tt.pvzID)
+			product, err := service.AddProduct(context.Background(), model.Product{TypeProduct: tt.typeProduct},
+				model.Pvz{ID: tt.pvzID})
 
 			// Проверяем ошибки
 			if tt.expectedError != nil {
@@ -203,7 +204,7 @@ func TestProductService_DeleteProduct(t *testing.T) {
 			tt.mockDeleteProductByID(mockProductRepo)
 
 			// Выполняем тестируемую функцию
-			err := service.DeleteProduct(context.Background(), tt.pvzID)
+			err := service.DeleteProduct(context.Background(), model.Pvz{ID: tt.pvzID})
 
 			// Проверяем ошибки
 			if tt.expectedError != nil {

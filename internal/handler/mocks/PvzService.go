@@ -15,9 +15,9 @@ type PvzService struct {
 	mock.Mock
 }
 
-// AddNewPvz provides a mock function with given fields: ctx, city
-func (_m *PvzService) AddNewPvz(ctx context.Context, city string) (*model.Pvz, error) {
-	ret := _m.Called(ctx, city)
+// AddNewPvz provides a mock function with given fields: ctx, pvz
+func (_m *PvzService) AddNewPvz(ctx context.Context, pvz model.Pvz) (*model.Pvz, error) {
+	ret := _m.Called(ctx, pvz)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddNewPvz")
@@ -25,19 +25,19 @@ func (_m *PvzService) AddNewPvz(ctx context.Context, city string) (*model.Pvz, e
 
 	var r0 *model.Pvz
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*model.Pvz, error)); ok {
-		return rf(ctx, city)
+	if rf, ok := ret.Get(0).(func(context.Context, model.Pvz) (*model.Pvz, error)); ok {
+		return rf(ctx, pvz)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *model.Pvz); ok {
-		r0 = rf(ctx, city)
+	if rf, ok := ret.Get(0).(func(context.Context, model.Pvz) *model.Pvz); ok {
+		r0 = rf(ctx, pvz)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.Pvz)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, city)
+	if rf, ok := ret.Get(1).(func(context.Context, model.Pvz) error); ok {
+		r1 = rf(ctx, pvz)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type CreateReceptionRequest struct {
+type ReceptionRequest struct {
 	PvzID string `json:"pvzId" validate:"required"`
 }
 

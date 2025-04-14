@@ -39,7 +39,7 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			name:    "успешное создание нового приёма",
 			reqBody: fmt.Sprintf(`{"pvzID": "%s"}`, testPvzID),
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, testPvzID).Return(&model.Reception{
+				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(&model.Reception{
 					ID:       testRecepID,
 					DateTime: fixedTime,
 					IsClosed: false,
@@ -54,7 +54,7 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			name:    "ошибка при обработке тела запроса - неверный формат",
 			reqBody: fmt.Sprintf(`{pvzID: "%s"}`, testPvzID), // неверный формат JSON
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, testPvzID).Return(nil, nil)
+				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(nil, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
@@ -63,7 +63,7 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			name:    "ошибка при проверке полей запроса - неверные данные",
 			reqBody: fmt.Sprintf(`{"role":"employee"}`),
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, testPvzID).Return(nil, nil)
+				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(nil, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
@@ -72,7 +72,7 @@ func TestReceptionHandlers_OpenNewReception(t *testing.T) {
 			name:    "ошибка при создании - сервис не смог создать",
 			reqBody: fmt.Sprintf(`{"pvzID": "%s"}`, testPvzID2),
 			mockSetup: func() {
-				mockReceptionService.On("CreateReception", mock.Anything, testPvzID2).Return(nil, fmt.Errorf("failed to create reception"))
+				mockReceptionService.On("CreateReception", mock.Anything, model.Reception{PvzID: testPvzID2}).Return(nil, fmt.Errorf("failed to create reception"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"failed to create Reception: failed to create reception"}`,
@@ -123,7 +123,7 @@ func TestReceptionHandlers_CloseLastReception(t *testing.T) {
 			name:       "успешное закрытие приёма",
 			pvzIdParam: testPvzID.String(),
 			mockSetup: func() {
-				mockReceptionService.On("CloseReception", mock.Anything, testPvzID).Return(&model.Reception{
+				mockReceptionService.On("CloseReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(&model.Reception{
 					ID:       testRecepID,
 					DateTime: fixedTime,
 					IsClosed: true,
@@ -138,7 +138,7 @@ func TestReceptionHandlers_CloseLastReception(t *testing.T) {
 			name:       "ошибка при неверном формате ID",
 			pvzIdParam: "invalid-uuid",
 			mockSetup: func() {
-				mockReceptionService.On("CloseReception", mock.Anything, testPvzID).Return(nil, nil)
+				mockReceptionService.On("CloseReception", mock.Anything, model.Reception{PvzID: testPvzID}).Return(nil, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrUUIDParsing),
@@ -147,7 +147,7 @@ func TestReceptionHandlers_CloseLastReception(t *testing.T) {
 			name:       "ошибка при закрытии приёма - сервис не смог закрыть",
 			pvzIdParam: testPvzID2.String(),
 			mockSetup: func() {
-				mockReceptionService.On("CloseReception", mock.Anything, testPvzID2).Return(nil, fmt.Errorf("failed to close reception"))
+				mockReceptionService.On("CloseReception", mock.Anything, model.Reception{PvzID: testPvzID2}).Return(nil, fmt.Errorf("failed to close reception"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"failed to close reception: failed to close reception"}`,

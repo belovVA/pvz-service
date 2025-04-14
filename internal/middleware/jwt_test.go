@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func mockGenerateToken(t *testing.T, claims map[string]interface{}, secret string) string {
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": claims["user_id"],
-		"role":    claims["role"],
+		UserIDKey: claims[UserIDKey],
+		RoleKey:   claims[RoleKey],
 		"exp":     time.Now().Add(time.Minute).Unix(),
 	})
 
@@ -25,7 +26,7 @@ func mockGenerateToken(t *testing.T, claims map[string]interface{}, secret strin
 func TestAuthenticate(t *testing.T) {
 	secret := "mysecret"
 	jwtMiddleware := NewJWT(secret)
-
+	id := uuid.New()
 	tests := []struct {
 		name           string
 		authHeader     string
@@ -46,24 +47,24 @@ func TestAuthenticate(t *testing.T) {
 		{
 			name: "valid token",
 			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
-				"user_id": "123",
-				"role":    "admin",
+				UserIDKey: id.String(),
+				RoleKey:   moderatorRole,
 			}, secret),
 			expectedStatus: http.StatusOK,
-			expectedUserID: "123",
-			expectedRole:   "admin",
+			expectedUserID: id.String(),
+			expectedRole:   moderatorRole,
 		},
 		{
-			name: "missing user_id in token",
+			name: "missing userId in token",
 			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
-				"role": "admin",
+				RoleKey: moderatorRole,
 			}, secret),
 			expectedStatus: http.StatusForbidden,
 		},
 		{
 			name: "missing role in token",
 			authHeader: "Bearer " + mockGenerateToken(t, map[string]interface{}{
-				"user_id": "123",
+				UserIDKey: id.String(),
 			}, secret),
 			expectedStatus: http.StatusForbidden,
 		},
@@ -79,8 +80,8 @@ func TestAuthenticate(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, tt.expectedUserID, r.Context().Value("user_id"))
-				assert.Equal(t, tt.expectedRole, r.Context().Value("role"))
+				assert.Equal(t, tt.expectedUserID, r.Context().Value(UserIDKey))
+				assert.Equal(t, tt.expectedRole, r.Context().Value(RoleKey))
 				w.WriteHeader(http.StatusOK)
 			})
 

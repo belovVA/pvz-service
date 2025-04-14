@@ -11,10 +11,12 @@ build-up:
 	docker compose up -d
 
 test:
-	go test -coverprofile=coverage.out ./...
+	go clean -testcache
+	go test -covermode=atomic -coverpkg=./... -coverprofile=coverage.out ./...
 
 cover:
-	 go tool cover -func=coverage.out
+	go tool cover -func=coverage.out
+
 
 generate_repo_mocks:
 	$(MOCKERY) --name=UserRepository --dir=internal/service --output=internal/service/mocks

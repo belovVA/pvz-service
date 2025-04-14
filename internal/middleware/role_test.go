@@ -55,24 +55,19 @@ func TestRequireRoles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Создаем новый запрос и контекст с ролью
 			req := httptest.NewRequest("GET", "/", nil)
 			ctx := context.WithValue(req.Context(), "role", tt.userRole)
 			req = req.WithContext(ctx)
 
-			// Создаем рекордер для записи ответа
 			rr := httptest.NewRecorder()
 
-			// Обработчик с middleware RequireRoles
 			next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			})
 
-			// Подключаем middleware
 			handler := RequireRoles(tt.allowedRoles...)(next)
 			handler.ServeHTTP(rr, req)
 
-			// Проверяем статус ответа
 			assert.Equal(t, tt.expectedStatus, rr.Code)
 		})
 	}

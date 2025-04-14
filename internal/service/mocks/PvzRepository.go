@@ -4,7 +4,6 @@ package mocks
 
 import (
 	context "context"
-
 	model "pvz-service/internal/model"
 
 	mock "github.com/stretchr/testify/mock"

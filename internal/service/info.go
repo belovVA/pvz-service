@@ -36,6 +36,7 @@ func (s *InfoService) GetInfoPvz(ctx context.Context, query *model.PvzInfoQuery)
 
 	recepMap := s.getMapReceptionsOrderByPvz(receptions)
 
+	// Если время не указано, значит подтягиваем ПВЗ, которые не имели еще приемок
 	if query.StartDate.IsZero() && query.EndDate.IsZero() {
 		idList, err := s.pvzRepository.GetIDListPvz(ctx)
 		if err != nil {
@@ -65,17 +66,18 @@ func (s *InfoService) GetInfoPvz(ctx context.Context, query *model.PvzInfoQuery)
 
 func (s *InfoService) getMapReceptionsOrderByPvz(receptions []model.Reception) map[uuid.UUID][]model.Reception {
 	recepMap := make(map[uuid.UUID][]model.Reception, len(receptions))
+
 	for _, recep := range receptions {
 		key := recep.PvzID
+
 		if _, ok := recepMap[key]; ok {
 			recepMap[key] = append(recepMap[key], recep)
 		} else {
-
 			recepMap[key] = make([]model.Reception, 0, 10)
 			recepMap[key] = append(recepMap[key], recep)
-
 		}
 	}
+
 	return recepMap
 }
 

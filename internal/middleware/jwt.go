@@ -12,7 +12,7 @@ import (
 const ErrInvalidToken = "Invalid token"
 
 const (
-	UserIDKey = "user_id"
+	UserIDKey = "userId"
 	RoleKey   = "role"
 )
 

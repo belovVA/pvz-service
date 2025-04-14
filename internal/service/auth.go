@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 	"pvz-service/internal/model"
 	"pvz-service/internal/service/pkg/hash"
 	"pvz-service/pkg/jwtutils"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
@@ -32,7 +33,6 @@ func NewAuthService(
 }
 
 func (s *AuthService) Registration(ctx context.Context, user model.User) (*model.User, error) {
-
 	hashPass, err := hash.HashPassword(user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to hash pass")
@@ -58,7 +58,6 @@ func (s *AuthService) Registration(ctx context.Context, user model.User) (*model
 }
 
 func (s *AuthService) Authenticate(ctx context.Context, user model.User) (string, error) {
-
 	current, err := s.userRepository.GetUserByEmail(ctx, user.Email)
 	if err != nil {
 		return "", fmt.Errorf("user not found")
@@ -73,45 +72,31 @@ func (s *AuthService) Authenticate(ctx context.Context, user model.User) (string
 	return token, err
 }
 
-func (s *AuthService) generateJWT(userID string, role string) (string, error) {
-	claims := map[string]interface{}{
-		"user_id": userID,
-		"role":    role,
-	}
-
-	token, err := jwtutils.Generate(claims, 24*time.Hour, s.jwtSecret)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate JWT token")
-	}
-
-	return token, nil
-}
-
-func (s *AuthService) DummyAuth(ctx context.Context, role string) (string, error) {
-	user, err := getTestUserByRole(role)
+func (s *AuthService) DummyAuth(ctx context.Context, user model.User) (string, error) {
+	userDummy, err := getTestUserByRole(user.Role)
 	if err != nil {
 		return "", err
 	}
 
-	token, err := s.Authenticate(ctx, *user)
+	token, err := s.Authenticate(ctx, *userDummy)
 
-	// Если данный тестовый пользователь не был найден
 	// Сработает только при первом вызове, либо при краше БД
+	// Если данный тестовый пользователь не был найден
 	// Попробуем его зарегать, а потом заново зайти
 	// Если получаем ошибку, то либо сменили пароль учетки, либо краш БД
 	if err != nil {
-		_, err = s.Registration(ctx, *user)
+		_, err = s.Registration(ctx, *userDummy)
 		if err != nil {
 			return "", fmt.Errorf("failed to create test user")
 		}
 
-		token, err = s.Authenticate(ctx, *user)
+		token, err = s.Authenticate(ctx, *userDummy)
 		if err != nil {
 			return "", fmt.Errorf("failed to authenticate test user")
 		}
 	}
-	return token, nil
 
+	return token, nil
 }
 
 func getTestUserByRole(role string) (*model.User, error) {
@@ -139,4 +124,18 @@ func getTestUserByRole(role string) (*model.User, error) {
 	}
 
 	return nil, fmt.Errorf("forbidden role")
+}
+
+func (s *AuthService) generateJWT(userID string, role string) (string, error) {
+	claims := map[string]interface{}{
+		"userId": userID,
+		"role":   role,
+	}
+
+	token, err := jwtutils.Generate(claims, 24*time.Hour, s.jwtSecret)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate JWT token")
+	}
+
+	return token, nil
 }

@@ -4,11 +4,11 @@ package mocks
 
 import (
 	context "context"
-	time "time"
-
 	model "pvz-service/internal/model"
 
 	mock "github.com/stretchr/testify/mock"
+
+	time "time"
 
 	uuid "github.com/google/uuid"
 )

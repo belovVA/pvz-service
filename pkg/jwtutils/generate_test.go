@@ -11,8 +11,8 @@ import (
 func TestGenerate(t *testing.T) {
 	t.Run("generates valid JWT", func(t *testing.T) {
 		args := map[string]interface{}{
-			"user_id": "123",
-			"role":    "moderator",
+			"userId": "123",
+			"role":   "moderator",
 		}
 		secret := "supersecret"
 		expiration := time.Minute
@@ -31,7 +31,7 @@ func TestGenerate(t *testing.T) {
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		assert.True(t, ok)
-		assert.Equal(t, "123", claims["user_id"])
+		assert.Equal(t, "123", claims["userId"])
 		assert.Equal(t, "moderator", claims["role"])
 
 		// Проверим, что exp установлен и валиден
@@ -41,7 +41,7 @@ func TestGenerate(t *testing.T) {
 	})
 
 	t.Run("returns error if secret is empty", func(t *testing.T) {
-		args := map[string]interface{}{"user_id": "123"}
+		args := map[string]interface{}{"userId": "123"}
 		tokenStr, err := Generate(args, time.Minute, "")
 		assert.ErrorIs(t, err, jwt.ErrInvalidKey)
 		assert.Empty(t, tokenStr)

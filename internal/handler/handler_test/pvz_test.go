@@ -37,7 +37,7 @@ func TestPvzHandler_Create(t *testing.T) {
 			name:    "успешное создание",
 			reqBody: fmt.Sprintf(`{"city": "%s"}`, handler.KazanRU),
 			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, handler.KazanRU).Return(&model.Pvz{
+				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(&model.Pvz{
 					ID:               testPvzID,
 					RegistrationDate: fixedTime,
 					City:             handler.KazanRU,
@@ -50,7 +50,7 @@ func TestPvzHandler_Create(t *testing.T) {
 			name:    "ошибка создания - invalidBody",
 			reqBody: fmt.Sprintf(`{city: "%s"}`, handler.KazanRU),
 			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, handler.KazanRU).Return(mock.Anything, nil)
+				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrBodyRequest),
@@ -59,7 +59,7 @@ func TestPvzHandler_Create(t *testing.T) {
 			name:    "ошибка создания - invalidFields",
 			reqBody: fmt.Sprintf(`{"role":"employee"}`),
 			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, handler.KazanRU).Return(mock.Anything, nil)
+				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrRequestFields),
@@ -68,7 +68,7 @@ func TestPvzHandler_Create(t *testing.T) {
 			name:    "ошибка создания - InvalidCity",
 			reqBody: fmt.Sprintf(`{"city": "%s"}`, "Nizhnekamsk"),
 			mockSetup: func() {
-				mockPvzService.On("AddNewPvz", mock.Anything, handler.KazanRU).Return(mock.Anything, nil)
+				mockPvzService.On("AddNewPvz", mock.Anything, model.Pvz{City: handler.KazanRU}).Return(mock.Anything, nil)
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   fmt.Sprintf(`{"message":"%s"}`, handler.ErrInvalidCity),

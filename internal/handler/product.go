@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
 	"pvz-service/internal/handler/pkg/response"
@@ -22,8 +21,8 @@ const (
 )
 
 type ProductService interface {
-	AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error)
-	DeleteProduct(ctx context.Context, pvzID uuid.UUID) error
+	AddProduct(ctx context.Context, product model.Product, pvz model.Pvz) (*model.Product, error)
+	DeleteProduct(ctx context.Context, pvz model.Pvz) error
 }
 
 type ProductHandlers struct {
@@ -53,20 +52,21 @@ func (h *ProductHandlers) CreateNewProduct(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	pvzID, err := converter.ParseUuid(req.PvzID)
+	pvzModel, err := converter.ToPvzFromIDRequest(req.PvzID)
 	if err != nil {
 		response.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrRequestFields, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	if err = validateType(req.TypeProduct); err != nil {
+	productModel := converter.ToProductFromCreateProductRequest(&req)
+	if err = validateType(productModel.TypeProduct); err != nil {
 		response.WriteError(w, ErrProductType, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrProductType, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	product, err := h.Service.AddProduct(r.Context(), req.TypeProduct, pvzID)
+	product, err := h.Service.AddProduct(r.Context(), *productModel, *pvzModel)
 	if err != nil {
 		response.WriteError(w, fmt.Sprintf("%s: %s", FailedCreateProduct, err.Error()), http.StatusBadRequest)
 		logger.InfoContext(r.Context(), FailedCreateProduct, slog.String(ErrorKey, err.Error()))
@@ -86,21 +86,22 @@ func (h *ProductHandlers) RemoveLastProduct(w http.ResponseWriter, r *http.Reque
 	logger := getLogger(r)
 	pvzIdStr := chi.URLParam(r, "pvzId")
 
-	pvzID, err := converter.ParseUuid(pvzIdStr)
+	pvzModel, err := converter.ToPvzFromIDRequest(pvzIdStr)
 	if err != nil {
 		response.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrUUIDParsing, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	err = h.Service.DeleteProduct(r.Context(), pvzID)
+	err = h.Service.DeleteProduct(r.Context(), *pvzModel)
 	if err != nil {
 		response.WriteError(w, fmt.Sprintf("%s:  %s", FailedDeleteProduct, err.Error()), http.StatusBadRequest)
 		logger.InfoContext(r.Context(), FailedDeleteProduct, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	logger.InfoContext(r.Context(), "successful delete last product", slog.String(PvzIDKey, pvzID.String()))
+	logger.InfoContext(r.Context(), "successful delete last product", slog.String(PvzIDKey, pvzModel.ID.String()))
+
 	response.Success(w, http.StatusOK)
 }
 

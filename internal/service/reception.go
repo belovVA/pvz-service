@@ -30,15 +30,16 @@ func NewReceptionService(repo ReceptionRepository) *ReceptionService {
 	}
 }
 
-func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error) {
+func (s *ReceptionService) CreateReception(ctx context.Context, receptionModel model.Reception) (*model.Reception, error) {
 	// Проверяем наличие последней приемки в данном ПВЗ и смотрим, был ли он закрыт
-	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
+	reception, err := s.receptionRepository.GetLastReception(ctx, receptionModel.PvzID)
 
 	if err == nil && !reception.IsClosed {
 		return nil, fmt.Errorf(ReceptionWasNotClosed)
 	}
 
-	id, err := s.receptionRepository.CreateReception(ctx, pvzID)
+	// Если ПВЗ с таким ID нет, то Constraint вернет ошибку и приемка не будет создана
+	id, err := s.receptionRepository.CreateReception(ctx, receptionModel.PvzID)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +52,8 @@ func (s *ReceptionService) CreateReception(ctx context.Context, pvzID uuid.UUID)
 	return rep, nil
 }
 
-func (s *ReceptionService) CloseReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error) {
-	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
+func (s *ReceptionService) CloseReception(ctx context.Context, receptionModel model.Reception) (*model.Reception, error) {
+	reception, err := s.receptionRepository.GetLastReception(ctx, receptionModel.PvzID)
 	if err != nil {
 		return nil, fmt.Errorf(PvzOrReceptionsNotExist)
 	}

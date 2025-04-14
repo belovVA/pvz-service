@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"pvz-service/internal/converter"
 	"pvz-service/internal/handler/dto"
 	"pvz-service/internal/handler/pkg/response"
@@ -21,8 +20,8 @@ const (
 )
 
 type ReceptionService interface {
-	CreateReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
-	CloseReception(ctx context.Context, pvzID uuid.UUID) (*model.Reception, error)
+	CreateReception(ctx context.Context, reception model.Reception) (*model.Reception, error)
+	CloseReception(ctx context.Context, reception model.Reception) (*model.Reception, error)
 }
 type ReceptionHandlers struct {
 	Service ReceptionService
@@ -35,7 +34,7 @@ func NewReceptionHandler(service ReceptionService) *ReceptionHandlers {
 }
 
 func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Request) {
-	var req dto.CreateReceptionRequest
+	var req dto.ReceptionRequest
 	logger := getLogger(r)
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -51,14 +50,14 @@ func (h *ReceptionHandlers) OpenNewReception(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	id, err := converter.ParseUuid(req.PvzID)
+	receptionModel, err := converter.ToReceptionFromReceptionRequest(&req)
 	if err != nil {
 		response.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrUUIDParsing, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	recep, err := h.Service.CreateReception(r.Context(), id)
+	recep, err := h.Service.CreateReception(r.Context(), *receptionModel)
 	if err != nil {
 		response.WriteError(w, fmt.Sprintf("%s: %s", FailedCreateReception, err.Error()), http.StatusBadRequest)
 		logger.InfoContext(r.Context(), FailedCreateReception, slog.String(ErrorKey, err.Error()))
@@ -75,14 +74,14 @@ func (h *ReceptionHandlers) CloseLastReception(w http.ResponseWriter, r *http.Re
 	pvzIdStr := chi.URLParam(r, "pvzId")
 	logger := getLogger(r)
 
-	pvzID, err := converter.ParseUuid(pvzIdStr)
+	receptionModel, err := converter.ToReceptionFromPvzIDRequest(pvzIdStr)
 	if err != nil {
 		response.WriteError(w, ErrUUIDParsing, http.StatusBadRequest)
 		logger.InfoContext(r.Context(), ErrUUIDParsing, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	recep, err := h.Service.CloseReception(r.Context(), pvzID)
+	recep, err := h.Service.CloseReception(r.Context(), *receptionModel)
 	if err != nil {
 		response.WriteError(w, fmt.Sprintf("%s: %s", FailedCloseReception, err.Error()), http.StatusBadRequest)
 		logger.InfoContext(r.Context(), FailedCloseReception, slog.String(ErrorKey, err.Error()))

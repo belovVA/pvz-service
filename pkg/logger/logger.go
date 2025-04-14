@@ -12,19 +12,19 @@ const (
 	ErrorKey string = "error"
 )
 
-type HandlerMiddlware struct {
+type Handler struct {
 	next slog.Handler
 }
 
-func NewHandlerMiddleware(next slog.Handler) *HandlerMiddlware {
-	return &HandlerMiddlware{next: next}
+func NewHandlerLogger(next slog.Handler) *Handler {
+	return &Handler{next: next}
 }
 
-func (h *HandlerMiddlware) Enabled(ctx context.Context, rec slog.Level) bool {
+func (h *Handler) Enabled(ctx context.Context, rec slog.Level) bool {
 	return h.next.Enabled(ctx, rec)
 }
 
-func (h *HandlerMiddlware) Handle(ctx context.Context, rec slog.Record) error {
+func (h *Handler) Handle(ctx context.Context, rec slog.Record) error {
 	// Добавляем userID, если он есть
 	if userID, ok := ctx.Value(middleware.UserIDKey).(string); ok && userID != "" {
 		rec.Add(middleware.UserIDKey, slog.StringValue(userID))
@@ -38,17 +38,17 @@ func (h *HandlerMiddlware) Handle(ctx context.Context, rec slog.Record) error {
 	return h.next.Handle(ctx, rec)
 }
 
-func (h *HandlerMiddlware) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return &HandlerMiddlware{next: h.next.WithAttrs(attrs)}
+func (h *Handler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return &Handler{next: h.next.WithAttrs(attrs)}
 }
 
-func (h *HandlerMiddlware) WithGroup(name string) slog.Handler {
-	return &HandlerMiddlware{next: h.next.WithGroup(name)}
+func (h *Handler) WithGroup(name string) slog.Handler {
+	return &Handler{next: h.next.WithGroup(name)}
 }
 
 func InitLogger() *slog.Logger {
 	baseHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})
-	wrappedHandler := NewHandlerMiddleware(baseHandler)
+	wrappedHandler := NewHandlerLogger(baseHandler)
 	logger := slog.New(wrappedHandler)
 	slog.SetDefault(logger)
 

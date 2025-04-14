@@ -21,8 +21,8 @@ func NewPvzService(repo PvzRepository) *PvzService {
 	return &PvzService{pvzRepository: repo}
 }
 
-func (s *PvzService) AddNewPvz(ctx context.Context, city string) (*model.Pvz, error) {
-	idPvz, err := s.pvzRepository.CreatePvz(ctx, city)
+func (s *PvzService) AddNewPvz(ctx context.Context, pvzModel model.Pvz) (*model.Pvz, error) {
+	idPvz, err := s.pvzRepository.CreatePvz(ctx, pvzModel.City)
 	if err != nil {
 		return nil, err
 	}

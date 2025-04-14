@@ -31,3 +31,10 @@ func ToUserFromLoginUserRequest(user *dto.LoginUserRequest) *model.User {
 		Role:     "",
 	}
 }
+
+func ToUserFromDummyLoginRequest(user *dto.TestUserRequest) *model.User {
+	return &model.User{
+		ID:   uuid.Nil,
+		Role: user.Role,
+	}
+}

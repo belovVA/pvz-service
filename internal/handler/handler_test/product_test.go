@@ -46,7 +46,8 @@ func TestProductHandlers_CreateNewProduct(t *testing.T) {
 			name: "успешное создание",
 			body: fmt.Sprintf(`{"type":"%s","pvzId":"%s"}`, handler.ElectrType, pvzID),
 			mockSetup: func() {
-				mockService.On("AddProduct", mock.Anything, handler.ElectrType, pvzID).Return(product, nil)
+				mockService.On("AddProduct", mock.Anything, model.Product{TypeProduct: handler.ElectrType},
+					model.Pvz{ID: pvzID}).Return(product, nil)
 			},
 			expectedStatus: http.StatusCreated,
 			expectedBody:   fmt.Sprintf(`{"id":"%s","receptionId":"%s","type":"%s","dateTime":"%s"}`, product.ID, testRecepID, handler.ElectrType, product.DateTime.Format(time.RFC3339)),
@@ -80,7 +81,8 @@ func TestProductHandlers_CreateNewProduct(t *testing.T) {
 			name: "ошибка при создании продукта",
 			body: fmt.Sprintf(`{"type":"%s","pvzId":"%s"}`, handler.ClothesType, pvzID),
 			mockSetup: func() {
-				mockService.On("AddProduct", mock.Anything, handler.ClothesType, pvzID).Return(nil, errors.New("DB error"))
+				mockService.On("AddProduct", mock.Anything, model.Product{TypeProduct: handler.ClothesType},
+					model.Pvz{ID: pvzID}).Return(nil, errors.New("DB error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"Failed add Product: DB error"}`,
@@ -125,7 +127,7 @@ func TestProductHandlers_RemoveLastProduct(t *testing.T) {
 			name:      "успешное удаление",
 			pvzIdPath: validPvzID.String(),
 			mockSetup: func() {
-				mockService.On("DeleteProduct", mock.Anything, validPvzID).Return(nil)
+				mockService.On("DeleteProduct", mock.Anything, model.Pvz{ID: validPvzID}).Return(nil)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   ``,
@@ -141,7 +143,7 @@ func TestProductHandlers_RemoveLastProduct(t *testing.T) {
 			name:      "ошибка при удалении",
 			pvzIdPath: validPvzID2.String(),
 			mockSetup: func() {
-				mockService.On("DeleteProduct", mock.Anything, validPvzID2).Return(errors.New("delete error"))
+				mockService.On("DeleteProduct", mock.Anything, model.Pvz{ID: validPvzID2}).Return(errors.New("delete error"))
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   `{"message":"failed to delete product:  delete error"}`,

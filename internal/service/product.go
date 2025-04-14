@@ -35,8 +35,8 @@ func NewProductService(repoProduct ProductRepository, repoRepository ReceptionRe
 	}
 }
 
-func (s *ProductService) AddProduct(ctx context.Context, typeProduct string, pvzID uuid.UUID) (*model.Product, error) {
-	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
+func (s *ProductService) AddProduct(ctx context.Context, product model.Product, pvz model.Pvz) (*model.Product, error) {
+	reception, err := s.receptionRepository.GetLastReception(ctx, pvz.ID)
 	if err != nil {
 		return nil, fmt.Errorf(PvzOrReceptionsNotExist)
 	}
@@ -45,21 +45,21 @@ func (s *ProductService) AddProduct(ctx context.Context, typeProduct string, pvz
 		return nil, fmt.Errorf(ReceptionAlreadyClosed)
 	}
 
-	idProduct, err := s.productRepository.CreateProduct(ctx, typeProduct, reception.ID)
+	idProduct, err := s.productRepository.CreateProduct(ctx, product.TypeProduct, reception.ID)
 	if err != nil {
 		return nil, fmt.Errorf(FailedProductCreate)
 	}
 
-	product, err := s.productRepository.GetProductByID(ctx, idProduct)
+	productAns, err := s.productRepository.GetProductByID(ctx, idProduct)
 	if err != nil {
 		return nil, fmt.Errorf(FailedProductCreate)
 	}
 
-	return product, nil
+	return productAns, nil
 }
 
-func (s *ProductService) DeleteProduct(ctx context.Context, pvzID uuid.UUID) error {
-	reception, err := s.receptionRepository.GetLastReception(ctx, pvzID)
+func (s *ProductService) DeleteProduct(ctx context.Context, pvz model.Pvz) error {
+	reception, err := s.receptionRepository.GetLastReception(ctx, pvz.ID)
 	if err != nil {
 		return fmt.Errorf(PvzOrReceptionsNotExist)
 	}

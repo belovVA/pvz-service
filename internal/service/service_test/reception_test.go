@@ -75,7 +75,7 @@ func TestReceptionService_CreateReception(t *testing.T) {
 			tt.mockGetReceptionByID(mockRepo)
 
 			// Выполняем тестируемую функцию
-			reception, err := service.CreateReception(context.Background(), tt.pvzID)
+			reception, err := service.CreateReception(context.Background(), model.Reception{PvzID: tt.pvzID})
 
 			// Проверяем ошибки
 			if tt.expectedError != nil {
@@ -145,7 +145,7 @@ func TestReceptionService_CloseReception(t *testing.T) {
 			tt.mockCloseReception(mockRepo)
 
 			// Выполняем тестируемую функцию
-			reception, err := service.CloseReception(context.Background(), tt.pvzID)
+			reception, err := service.CloseReception(context.Background(), model.Reception{PvzID: tt.pvzID})
 
 			// Проверяем ошибки
 			if tt.expectedError != nil {

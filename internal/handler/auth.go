@@ -16,7 +16,7 @@ import (
 type AuthService interface {
 	Registration(ctx context.Context, user model.User) (*model.User, error)
 	Authenticate(ctx context.Context, user model.User) (string, error)
-	DummyAuth(ctx context.Context, role string) (string, error)
+	DummyAuth(ctx context.Context, user model.User) (string, error)
 }
 
 type AuthHandlers struct {
@@ -46,13 +46,14 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validateRole(req.Role); err != nil {
+	userModel := *converter.ToUserFromCreateUserRequest(&req)
+	if err := validateRole(userModel.Role); err != nil {
 		response.WriteError(w, ErrInvalidRole, http.StatusBadRequest)
 		logger.Info(ErrInvalidRole, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	user, err := h.Service.Registration(r.Context(), *converter.ToUserFromCreateUserRequest(&req))
+	user, err := h.Service.Registration(r.Context(), userModel)
 	if err != nil {
 		response.WriteError(w, err.Error(), http.StatusBadRequest)
 		logger.Info("error to register user", slog.String(ErrorKey, err.Error()))
@@ -61,6 +62,7 @@ func (h *AuthHandlers) Register(w http.ResponseWriter, r *http.Request) {
 
 	resp := converter.ToCreateUserResponseFromUser(user)
 	logger.InfoContext(r.Context(), "successful register", slog.String(UserIDKey, user.ID.String()))
+
 	response.SuccessJSON(w, resp, http.StatusCreated)
 }
 
@@ -110,22 +112,23 @@ func (h *AuthHandlers) DummyLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validateRole(req.Role); err != nil {
+	userModel := *converter.ToUserFromDummyLoginRequest(&req)
+	if err := validateRole(userModel.Role); err != nil {
 		response.WriteError(w, ErrInvalidRole, http.StatusBadRequest)
 		logger.Info(ErrInvalidRole, slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	token, err := h.Service.DummyAuth(r.Context(), req.Role)
+	token, err := h.Service.DummyAuth(r.Context(), userModel)
 	if err != nil {
 		response.WriteError(w, err.Error(), http.StatusBadRequest)
 		logger.Info("error to login testUser", slog.String(ErrorKey, err.Error()))
 		return
 	}
 
-	response.SuccessText(w, token, http.StatusOK)
 	logger.InfoContext(r.Context(), "successful dummyLogin", slog.String("role", req.Role))
 
+	response.SuccessText(w, token, http.StatusOK)
 }
 
 func validateRole(role string) error {
